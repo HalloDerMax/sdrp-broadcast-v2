@@ -41,20 +41,36 @@ function PlayersPage() {
 
   const fetchPlayers = async () => {
     try {
-      // MOCKUP DATEN - Ersetze mit deiner API
-      const mockPlayers = [
-        { id: 1, username: 'HalloDerMax', lives: 3, kills: 12, deaths: 0, playTime: '48h', status: 'online', lastDeath: null },
-        { id: 2, username: 'Butterfly_Lea', lives: 3, kills: 8, deaths: 0, playTime: '42h', status: 'online', lastDeath: null },
-        { id: 3, username: 'thisismarlon_', lives: 2, kills: 5, deaths: 1, playTime: '35h', status: 'offline', lastDeath: 'Creeper Explosion' },
-        { id: 4, username: 'JimKnopf27', lives: 2, kills: 3, deaths: 1, playTime: '28h', status: 'online', lastDeath: 'Fall Damage' },
-        { id: 5, username: 'rudiik11', lives: 1, kills: 1, deaths: 2, playTime: '22h', status: 'online', lastDeath: 'PvP vs HalloDerMax' },
-        { id: 6, username: 'Player123', lives: 1, kills: 0, deaths: 2, playTime: '15h', status: 'offline', lastDeath: 'Lava' },
-        { id: 7, username: 'ProGamer99', lives: 0, kills: 2, deaths: 3, playTime: '18h', status: 'eliminated', lastDeath: 'PvP vs Butterfly_Lea' },
-        { id: 8, username: 'Noob42', lives: 0, kills: 0, deaths: 3, playTime: '8h', status: 'eliminated', lastDeath: 'Skeleton' },
-      ];
-      setPlayers(mockPlayers);
+      // ECHTE API ABFRAGE
+      const response = await axios.get(`${API_BASE}/api/minecraft/players`);
+      const playersData = response.data.players || [];
+      
+      // Verarbeite und normalisiere die Daten
+      const processedPlayers = playersData.map((player, index) => ({
+        id: player.id || index,
+        username: player.username || player.name || player.player || 'Unknown',
+        lives: player.lives !== undefined ? player.lives : 3,
+        kills: player.kills || 0,
+        deaths: player.deaths || 0,
+        playTime: player.playTime || player.playtime || '0h',
+        status: player.status || (player.lives === 0 ? 'eliminated' : 'offline'),
+        lastDeath: player.lastDeath || player.last_death || null
+      }));
+      
+      setPlayers(processedPlayers);
+      console.log('✅ Players loaded:', processedPlayers.length);
     } catch (error) {
-      console.error('Error fetching players:', error);
+      console.error('❌ Error fetching players:', error);
+      
+      // FALLBACK: Zeige leere Liste oder minimale Mockup-Daten
+      setPlayers([]);
+      
+      // Optional: Notification anzeigen
+      notifications.show({
+        title: 'Fehler beim Laden',
+        message: 'Spieler-Daten konnten nicht geladen werden',
+        color: 'red',
+      });
     }
   };
 
@@ -547,7 +563,7 @@ function App() {
                   <Text className="mc-font" style={{ fontSize: '10px', color: '#ff4d4d', textShadow: '1px 1px #000' }}>Death_LOG (RECENT_DEATHS)</Text>
                 </Group>
                 <Paper className="mc-panel" p="xs">
-                  <ScrollArea h={220} offsetScrollbars>
+                  <ScrollArea h={250} offsetScrollbars>
                     <Stack gap={5}>
                       {deathHistory.length > 0 ? deathHistory.map((d, i) => (
                         <Box key={d.id || i} px="md" py={8} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
