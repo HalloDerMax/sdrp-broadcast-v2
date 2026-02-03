@@ -53,17 +53,19 @@ function App() {
       const [sRes, mRes, dRes] = await Promise.all([
         axios.get(`${API_BASE}/api/twitch/streams`).catch(() => ({ data: { streams: [] } })),
         axios.get(`${API_BASE}/api/twitch/streamer-data`).catch(() => ({ data: { streamers: [] } })),
-        axios.get(`${API_BASE}/api/deathbroadcast`).catch(() => ({ data: [] })) // Dein neuer funktionierender Endpoint
+        axios.get(`${API_BASE}/api/deathbroadcast`).catch(() => ({ data: { messages: [] } }))
       ]);
+      
       const liveStreams = sRes.data.streams || [];
       setStreams(liveStreams);
       setAllStreamerData(mRes.data.streamers || []);
       
-      // Falls dRes.data ein Array ist, direkt setzen, sonst leeres Array
-      setDeathHistory(Array.isArray(dRes.data) ? dRes.data : []);
+      // Korrektur für deine API Struktur (data.messages)
+      const deaths = dRes.data.messages || [];
+      setDeathHistory(deaths);
       
       if (liveStreams.length > 0 && !selectedStream) setSelectedStream(liveStreams[0]);
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("API Fetch Error:", e); }
   }, [selectedStream]);
 
   useEffect(() => {
@@ -183,26 +185,32 @@ function App() {
                 <ScrollArea h={120} offsetScrollbars>
                   <Stack gap={5}>
                     {deathHistory.length > 0 ? deathHistory.map((d, i) => (
-                      <Box key={i} px="md" py={8} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <Box key={d.id || i} px="md" py={8} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                         <Group justify="space-between" wrap="nowrap">
                           <Group gap="sm" wrap="nowrap">
                             <Avatar src={`https://minotar.net/avatar/${d.player || 'Steve'}/24`} radius={0} className="pixel-border" size="sm" />
                             <Stack gap={2}>
-                              <Text className="mc-font" style={{ fontSize: '8px' }} c={d.isFinalDeath ? "red" : "white"}>
-                                {d.message || `${d.player} ist gestorben`}
+                              <Text className="mc-font" style={{ fontSize: '8px' }} c="white">
+                                {d.message}
                               </Text>
                               <Text style={{ fontSize: '7px', color: '#aaa', fontFamily: 'Inter' }}>
-                                ⚠ {d.damageCause || 'Unbekannt'} – 🕒 {d.minutesLived || 0} Min – 🗡️ {d.killer || 'Umwelt'}
+                                🗡️ Killer: {d.killer || 'Umwelt'} {d.weapon && d.weapon !== "Unbekannt" ? `(${d.weapon})` : ''} – 🕒 {new Date(d.timestamp).toLocaleTimeString()}
                               </Text>
                             </Stack>
                           </Group>
-                          <Badge color={d.isFinalDeath ? "red" : "green"} radius={0} size="xs" className="mc-font" style={{fontSize: '7px'}}>
-                            {d.isFinalDeath ? "☠ PERMADEATH" : `❤️ ${d.remainingLives} LEBEN`}
+                          <Badge 
+                            color={d.message?.includes("3/3") ? "red" : "green"} 
+                            radius={0} 
+                            size="xs" 
+                            className="mc-font" 
+                            style={{fontSize: '7px'}}
+                          >
+                            {d.message?.includes("3/3") ? "☠ FINAL" : "❤️ ALIVE"}
                           </Badge>
                         </Group>
                       </Box>
                     )) : (
-                      <Text className="mc-font" size="xs" c="dimmed" p="sm" ta="center" style={{fontSize: '8px'}}>SYSTEM_READY: NO_DEATHS_DETECTED</Text>
+                      <Text className="mc-font" size="xs" c="dimmed" p="sm" ta="center" style={{fontSize: '8px'}}>SYSTEM_READY: NO_RECENT_DEATHS_DETECTED</Text>
                     )}
                   </Stack>
                 </ScrollArea>
@@ -257,7 +265,7 @@ function App() {
                 <Card key={os.id} className="mc-panel" p="xs" style={{opacity: 0.8}}>
                   <Stack align="center" gap="xs">
                     <Avatar src={os.profile_image_url || `https://minotar.net/avatar/${os.login}/48`} size="xl" radius={0} className="pixel-border" />
-                    <Text className="mc-font" style={{ fontSize: '7px' }} ta="center" truncate w="100%">{os.display_name}</Text>
+                    <Text className="mc-font" style={{ fontSize: '7px' }} align="center" truncate w="100%">{os.display_name}</Text>
                     <Badge variant="outline" color="gray" size="xs" radius={0} style={{fontSize: '7px'}}>OFFLINE</Badge>
                   </Stack>
                 </Card>
