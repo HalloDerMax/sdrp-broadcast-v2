@@ -53,27 +53,22 @@ function App() {
       const [sRes, mRes, dRes] = await Promise.all([
         axios.get(`${API_BASE}/api/twitch/streams`).catch(() => ({ data: { streams: [] } })),
         axios.get(`${API_BASE}/api/twitch/streamer-data`).catch(() => ({ data: { streamers: [] } })),
-        axios.get(`${API_BASE}/api/deathbroadcast/stats`).catch(() => ({ data: [] })) // Korrigierter Pfad
+        axios.get(`${API_BASE}/api/deathbroadcast`).catch(() => ({ data: [] })) // Dein neuer funktionierender Endpoint
       ]);
-
       const liveStreams = sRes.data.streams || [];
       setStreams(liveStreams);
       setAllStreamerData(mRes.data.streamers || []);
       
-      // Flexibles Mapping für die Todes-Daten
-      const deaths = Array.isArray(dRes.data) ? dRes.data : (dRes.data.deaths || []);
-      setDeathHistory(deaths);
-
+      // Falls dRes.data ein Array ist, direkt setzen, sonst leeres Array
+      setDeathHistory(Array.isArray(dRes.data) ? dRes.data : []);
+      
       if (liveStreams.length > 0 && !selectedStream) setSelectedStream(liveStreams[0]);
-    } catch (e) { 
-        console.error("API Fehler:", e); 
-    }
+    } catch (e) { console.error(e); }
   }, [selectedStream]);
 
   useEffect(() => {
     fetchData();
-    // Intervall auf 30 Sekunden erhöht, um Twitch "Too Many Requests" zu vermeiden
-    const interval = setInterval(fetchData, 30000); 
+    const interval = setInterval(fetchData, 20000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -92,8 +87,8 @@ function App() {
           margin: 0;
           padding: 0;
           min-height: 100vh;
-          background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), 
-                            url('https://image-5.uhdpaper.com/wallpaper/minecraft-movie-creeper-4k-wallpaper-uhdpaper.com-231@5@e.jpg') !important;
+          background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), 
+                            url('https://images4.alphacoders.com/137/thumb-1920-1377210.jpg') !important;
           background-size: cover !important;
           background-position: center !important;
           background-attachment: fixed !important;
@@ -101,8 +96,16 @@ function App() {
           background-color: #000 !important;
         }
 
-        #root, .mantine-AppShell-root, .mantine-AppShell-main { background: transparent !important; }
-        .mantine-AppShell-header { background: rgba(34, 34, 34, 0.85) !important; border-bottom: 6px solid #000 !important; backdrop-filter: blur(10px); }
+        #root, .mantine-AppShell-root, .mantine-AppShell-main {
+          background: transparent !important;
+        }
+
+        .mantine-AppShell-header {
+          background: rgba(34, 34, 34, 0.85) !important;
+          border-bottom: 6px solid #000 !important;
+          backdrop-filter: blur(10px);
+        }
+
         .mc-font { font-family: 'Press Start 2P', cursive !important; }
         .standard-font { font-family: 'Inter', sans-serif !important; }
 
@@ -120,6 +123,7 @@ function App() {
         }
 
         .mc-nav-btn-discord { background: #5865F2; box-shadow: inset -4px -4px #3d46a8, inset 4px 4px #8a94ff !important; }
+        
         .timer-block { background: rgba(0,0,0,0.8); border: 3px solid #555; box-shadow: inset -2px -2px #222, inset 2px 2px #888; padding: 8px 12px; min-width: 220px; }
         
         .mc-panel { 
@@ -162,7 +166,7 @@ function App() {
               <Group gap="lg">
                 <Button className="mc-nav-btn mc-font" leftSection={<IconBroadcast size={18}/>} component="a" href="#live-section">LIVE</Button>
                 <Button className="mc-nav-btn mc-font" leftSection={<IconUsers size={18}/>} component="a" href="#streamer-section">STREAMER</Button>
-                <ActionIcon className="mc-nav-btn mc-nav-btn-discord" size="xl" component="a" href="https://discord.gg/sdrp" target="_blank"><IconBrandDiscord size={24}/></ActionIcon>
+                <ActionIcon className="mc-nav-btn mc-nav-btn-discord" size="xl" component="a" href="https://discord.gg/PaPe5WA3kz" target="_blank"><IconBrandDiscord size={24}/></ActionIcon>
               </Group>
             </Group>
           </Container>
@@ -176,18 +180,29 @@ function App() {
                 <Text className="mc-font" style={{ fontSize: '10px', color: '#ff4d4d', textShadow: '1px 1px #000' }}>Death_LOG (RECENT_DEATHS)</Text>
               </Group>
               <Paper className="mc-panel" p="xs">
-                <ScrollArea h={100} offsetScrollbars>
+                <ScrollArea h={120} offsetScrollbars>
                   <Stack gap={5}>
                     {deathHistory.length > 0 ? deathHistory.map((d, i) => (
-                      <Group key={i} justify="space-between" px="md" py={4} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <Group gap="sm">
-                          <Avatar src={`https://minotar.net/avatar/${d.player || d.username || 'Steve'}/24`} radius={0} className="pixel-border" size="sm" />
-                          <Text className="mc-font" style={{ fontSize: '8px' }} c="white">{d.player || d.username}</Text>
+                      <Box key={i} px="md" py={8} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Group justify="space-between" wrap="nowrap">
+                          <Group gap="sm" wrap="nowrap">
+                            <Avatar src={`https://minotar.net/avatar/${d.player || 'Steve'}/24`} radius={0} className="pixel-border" size="sm" />
+                            <Stack gap={2}>
+                              <Text className="mc-font" style={{ fontSize: '8px' }} c={d.isFinalDeath ? "red" : "white"}>
+                                {d.message || `${d.player} ist gestorben`}
+                              </Text>
+                              <Text style={{ fontSize: '7px', color: '#aaa', fontFamily: 'Inter' }}>
+                                ⚠ {d.damageCause || 'Unbekannt'} – 🕒 {d.minutesLived || 0} Min – 🗡️ {d.killer || 'Umwelt'}
+                              </Text>
+                            </Stack>
+                          </Group>
+                          <Badge color={d.isFinalDeath ? "red" : "green"} radius={0} size="xs" className="mc-font" style={{fontSize: '7px'}}>
+                            {d.isFinalDeath ? "☠ PERMADEATH" : `❤️ ${d.remainingLives} LEBEN`}
+                          </Badge>
                         </Group>
-                        <Text className="standard-font" size="xs" c="orange" italic>{d.cause || d.reason || 'Unbekannte Ursache'}</Text>
-                      </Group>
+                      </Box>
                     )) : (
-                      <Text className="mc-font" size="xs" c="dimmed" p="sm" ta="center" style={{fontSize: '8px'}}>NO_RECENT_DEATHS_DETECTED</Text>
+                      <Text className="mc-font" size="xs" c="dimmed" p="sm" ta="center" style={{fontSize: '8px'}}>SYSTEM_READY: NO_DEATHS_DETECTED</Text>
                     )}
                   </Stack>
                 </ScrollArea>
@@ -198,12 +213,7 @@ function App() {
               <Box mb={50} id="live-section">
                 <Box style={{ display: 'flex', gap: '15px', height: '60vh', alignItems: 'stretch' }}>
                   <Box className="mc-panel live-glow" style={{ flex: 1, background: '#000', padding: '4px' }}>
-                    {/* muted=true hinzugefügt für besseren Autoplay-Support */}
-                    <iframe 
-                      src={`https://player.twitch.tv/?channel=${selectedStream.user_login}&parent=${window.location.hostname}&autoplay=true&muted=true`} 
-                      style={{ width: '100%', height: '100%', border: 'none' }} 
-                      allowFullScreen 
-                    />
+                    <iframe src={`https://player.twitch.tv/?channel=${selectedStream.user_login}&parent=${window.location.hostname}&autoplay=true&muted=true`} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
                   </Box>
                   <Box className="mc-panel" visibleFrom="lg" style={{ width: '340px', background: '#18181b', padding: '4px' }}>
                     <iframe src={`https://www.twitch.tv/embed/${selectedStream.user_login}/chat?parent=${window.location.hostname}&darkpopout`} style={{ width: '100%', height: '100%', border: 'none' }} />
@@ -213,10 +223,7 @@ function App() {
                   <Group justify="space-between">
                     <Group>
                       <Avatar src={`https://minotar.net/avatar/${selectedStream.user_name}/48`} radius={0} className="pixel-border" />
-                      <Stack gap={0}>
-                        <Text fw={900} className="mc-font" size="sm" c="green">{selectedStream.user_name}</Text>
-                        <Text size="xs" c="dimmed" style={{fontFamily: 'Inter'}}>{selectedStream.title}</Text>
-                      </Stack>
+                      <Stack gap={0}><Text fw={900} className="mc-font" size="sm" c="green">{selectedStream.user_name}</Text><Text size="xs" c="dimmed" style={{fontFamily: 'Inter'}}>{selectedStream.title}</Text></Stack>
                     </Group>
                     <Badge color="red" size="lg" radius={0} className="mc-font">LIVE_NOW</Badge>
                   </Group>
@@ -224,7 +231,6 @@ function App() {
               </Box>
             )}
 
-            {/* Restlicher Content (Live Streamers, Offline Database, Event Infos) bleibt gleich */}
             <Group mb="md" id="streamer-section">
                 <IconBroadcast size={20} color="red" />
                 <Title order={4} className="mc-font" style={{ fontSize: '14px', textShadow: '2px 2px #000' }}>CURRENTLY_LIVE</Title>
@@ -278,7 +284,7 @@ function App() {
                 <Stack align="center" gap="md">
                   <Title className="mc-font" order={2} style={{ fontSize: '18px', textShadow: '2px 2px #000', textAlign: 'center' }}>Bereit für Second Dimension?</Title>
                   <Group mt="lg">
-                    <Button size="lg" className="mc-nav-btn mc-font mc-nav-btn-discord" component="a" href="https://discord.gg/sdrp" target="_blank">DISCORD</Button>
+                    <Button size="lg" className="mc-nav-btn mc-font mc-nav-btn-discord" component="a" href="https://discord.gg/PaPe5WA3kz" target="_blank">DISCORD</Button>
                     <Button size="lg" className="mc-nav-btn mc-font" style={{background: '#388E3C'}}>BEITRETEN</Button>
                   </Group>
                 </Stack>
