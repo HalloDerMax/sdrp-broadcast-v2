@@ -32,15 +32,22 @@ function PlayersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterLives, setFilterLives] = useState('all');
   const [sortBy, setSortBy] = useState('name');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchPlayers();
-    const interval = setInterval(fetchPlayers, 15000);
+    // Auto-Refresh alle 30 Sekunden
+    const interval = setInterval(() => {
+      fetchPlayers();
+      setLastUpdate(new Date());
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const fetchPlayers = async () => {
     try {
+      setIsRefreshing(true);
       // ECHTE API ABFRAGE - Minecraft Players
       const response = await axios.get(`${API_BASE}/api/minecraft/players`);
       const apiData = response.data;
@@ -51,6 +58,7 @@ function PlayersPage() {
       if (playersData.length === 0) {
         console.warn('⚠️ No players found in API response');
         setPlayers([]);
+        setIsRefreshing(false);
         return;
       }
       
@@ -67,6 +75,7 @@ function PlayersPage() {
       }));
       
       setPlayers(processedPlayers);
+      setIsRefreshing(false);
       console.log('✅ Players loaded from API:', processedPlayers.length);
       console.log('📊 Stats:', {
         total: processedPlayers.length,
@@ -74,6 +83,7 @@ function PlayersPage() {
         eliminated: processedPlayers.filter(p => p.lives === 0).length
       });
     } catch (error) {
+      setIsRefreshing(false);
       console.error('❌ Error fetching players:', error);
       console.error('   API Base:', API_BASE);
       console.error('   Endpoint:', `${API_BASE}/api/minecraft/players`);
@@ -161,6 +171,10 @@ function PlayersPage() {
           25% { transform: scale(1.1); }
           50% { transform: scale(1); }
         }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
         .player-card-hover {
           transition: all 0.3s ease;
         }
@@ -171,11 +185,27 @@ function PlayersPage() {
       `}} />
 
       {/* HEADER */}
-      <Group mb="xl">
-        <IconHeart size={32} color="#ef4444" />
-        <Title className="mc-font" style={{ fontSize: '18px', textShadow: '2px 2px #000' }}>
-          SPIELER LEBEN
-        </Title>
+      <Group mb="xl" justify="space-between">
+        <Group>
+          <IconHeart size={32} color="#ef4444" />
+          <Title className="mc-font" style={{ fontSize: '18px', textShadow: '2px 2px #000' }}>
+            SPIELER LEBEN
+          </Title>
+        </Group>
+        <Paper className="mc-panel" p="xs" px="md">
+          <Group gap="xs">
+            <IconClock 
+              size={14} 
+              color={isRefreshing ? "#eab308" : "#48bb78"} 
+              style={{ 
+                animation: isRefreshing ? 'spin 1s linear infinite' : 'none' 
+              }}
+            />
+            <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>
+              {isRefreshing ? 'LÄDT...' : `UPDATE: ${lastUpdate.toLocaleTimeString('de-DE')}`}
+            </Text>
+          </Group>
+        </Paper>
       </Group>
 
       {/* STATS */}
