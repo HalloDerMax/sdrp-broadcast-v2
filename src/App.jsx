@@ -1016,21 +1016,21 @@ function App() {
                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg" mb="lg">
                   <Card className="sd-card" p="xl">
                     <Group mb="md"><ThemeIcon color="orange" variant="light" size="lg"><IconBroadcast size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Infos</Text></Group>
-                    <Text size="xs" className="standard-font" c="#8b949e">🟩 Minecraft Hardcore Event – Regeln & Infos
+                    <Text size="xs" className="standard-font" c="#8b949e"></p>🟩 Minecraft Hardcore Event – Regeln & Infos</p>
 
-🔒 Zutritt nur über Whitelist
-Das Projekt kann ausschließlich über die Whitelist betreten werden.
+<p></p>🔒 Zutritt nur über Whitelist
+Das Projekt kann ausschließlich über die Whitelist betreten werden.</p>
 
-❤️ Leben-System
+<p></p>❤️ Leben-System
 Jeder Spieler startet mit 3 Leben.
-Verliert ein Spieler sein drittes Leben, scheidet er aus dem aktiven Spiel aus und ist nur noch Zuschauer.
+Verliert ein Spieler sein drittes Leben, scheidet er aus dem aktiven Spiel aus und ist nur noch Zuschauer.</p>
 
-⚔️ PvP-Regelung
+<p>⚔️ PvP-Regelung
 Das absichtliche Töten von Mitspielern ohne triftigen Grund ist nicht erlaubt.
-(Regelverstöße können zu Strafen oder Ausschluss führen.)
+(Regelverstöße können zu Strafen oder Ausschluss führen.)</p>
 
-🎥 Streaming-Hinweis
-Wenn du das Event streamst, melde dich bitte im Discord, damit dein Stream auf der Projektseite angezeigt werden kann.</Text>
+<p>🎥 Streaming-Hinweis
+Wenn du das Event streamst, melde dich bitte im Discord, damit dein Stream auf der Projektseite angezeigt werden kann.</Text> </p>
                   </Card>
                   <Card className="sd-card" p="xl">
                     <Group mb="md"><ThemeIcon color="blue" variant="light" size="lg"><IconUsers size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Highlights</Text></Group>
