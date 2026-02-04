@@ -640,6 +640,107 @@ function App() {
             </Stack>
           </Paper>
 
+          {/* VOICE PLUGIN */}
+          <Paper 
+            className="mc-panel" 
+            p="lg"
+            style={{ 
+              background: 'rgba(59, 130, 246, 0.15)',
+              border: '4px solid #3b82f6',
+              boxShadow: '0 0 15px rgba(59, 130, 246, 0.3), inset -4px -4px #1a1a1a, inset 4px 4px #555',
+            }}
+          >
+            <Stack gap="md">
+              <Group gap="xs">
+                <IconPaw size={20} color="#3b82f6" />
+                <Text className="mc-font" size="sm" c="blue" style={{ fontSize: '11px' }}>
+                  VOICE_PLUGIN:
+                </Text>
+              </Group>
+              
+              <Text className="standard-font" size="sm" c="dimmed">
+                Lade dir noch das <strong>Ingame Voice Plugin</strong> runter!
+              </Text>
+              
+              <Stack gap="xs">
+                <Group gap="xs">
+                  <Text className="mc-font" c="blue" style={{ fontSize: '10px' }}>1.</Text>
+                  <Text className="standard-font" size="xs" c="dimmed">
+                    Öffne <strong>CurseForge</strong>
+                  </Text>
+                </Group>
+                <Group gap="xs">
+                  <Text className="mc-font" c="blue" style={{ fontSize: '10px' }}>2.</Text>
+                  <Text className="standard-font" size="xs" c="dimmed">
+                    Klicke auf <strong>"Import"</strong>
+                  </Text>
+                </Group>
+                <Group gap="xs">
+                  <Text className="mc-font" c="blue" style={{ fontSize: '10px' }}>3.</Text>
+                  <Text className="standard-font" size="xs" c="dimmed">
+                    Gib folgenden Code ein:
+                  </Text>
+                </Group>
+              </Stack>
+
+              {/* CODE CTA BOX */}
+              <Paper
+                p="md"
+                style={{
+                  background: 'rgba(234, 179, 8, 0.2)',
+                  border: '4px solid #eab308',
+                  boxShadow: '0 0 20px rgba(234, 179, 8, 0.4), inset -4px -4px #1a1a1a, inset 4px 4px #555',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onClick={() => {
+                  navigator.clipboard.writeText('1fVzzMey');
+                  notifications.show({
+                    title: 'Code kopiert!',
+                    message: '1fVzzMey wurde kopiert',
+                    color: 'yellow',
+                    autoClose: 2000,
+                  });
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 0 25px rgba(234, 179, 8, 0.6), inset -4px -4px #1a1a1a, inset 4px 4px #555';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(234, 179, 8, 0.4), inset -4px -4px #1a1a1a, inset 4px 4px #555';
+                }}
+              >
+                <Stack gap="xs" align="center">
+                  <Text className="mc-font" size="xs" c="yellow" style={{ fontSize: '8px' }}>
+                    📋 KLICK ZUM KOPIEREN
+                  </Text>
+                  <Text 
+                    className="mc-font"
+                    style={{ 
+                      fontSize: '24px',
+                      color: '#eab308',
+                      textShadow: '2px 2px #000',
+                      letterSpacing: '4px',
+                      userSelect: 'all'
+                    }}
+                  >
+                    1fVzzMey
+                  </Text>
+                  <Badge 
+                    color="yellow" 
+                    size="sm" 
+                    radius={0}
+                    className="mc-font"
+                    style={{ fontSize: '7px' }}
+                  >
+                    CURSEFORGE_CODE
+                  </Badge>
+                </Stack>
+              </Paper>
+            </Stack>
+          </Paper>
+
           {/* BUTTONS */}
           <Group justify="center" gap="md">
             <Button 
