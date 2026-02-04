@@ -780,7 +780,7 @@ function App() {
           padding: 0;
           min-height: 100vh;
           background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), 
-                            url('https://images4.alphacoders.com/137/thumb-1920-1377210.jpg') !important;
+                            url('https://minecraft.fr/wp-content/uploads/2021/12/fond-ecran-minecraft-1-18-cave-luxuriante.jpg') !important;
           background-size: cover !important;
           background-position: center !important;
           background-attachment: fixed !important;
