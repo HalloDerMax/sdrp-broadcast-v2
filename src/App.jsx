@@ -431,6 +431,7 @@ function App() {
   const [timeLabel, setTimeLabel] = useState('');
   const [timeValue, setTimeValue] = useState('');
   const [currentPage, setCurrentPage] = useState('home'); // 'home' or 'dashboard'
+  const [joinModalOpened, setJoinModalOpened] = useState(false);
 
   useEffect(() => {
     const updateTimer = () => {
@@ -482,6 +483,194 @@ function App() {
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <Notifications position="top-right" />
+      
+      {/* JOIN SERVER MODAL */}
+      <Modal
+        opened={joinModalOpened}
+        onClose={() => setJoinModalOpened(false)}
+        title={
+          <Group gap="xs">
+            <IconCar size={24} color="#22c55e" />
+            <Text className="mc-font" style={{ fontSize: '14px', color: '#22c55e' }}>
+              SERVER_BEITRETEN
+            </Text>
+          </Group>
+        }
+        size="lg"
+        centered
+        styles={{
+          header: {
+            background: 'rgba(49, 49, 49, 0.95)',
+            borderBottom: '4px solid #000',
+            padding: '20px',
+          },
+          body: {
+            background: 'rgba(34, 34, 34, 0.95)',
+            padding: '30px',
+          },
+          content: {
+            border: '6px solid #000',
+            boxShadow: '0 0 30px rgba(0, 0, 0, 0.8)',
+          },
+          title: {
+            width: '100%',
+          },
+        }}
+      >
+        <Stack gap="xl">
+          {/* SERVER IP BOX */}
+          <Paper 
+            className="mc-panel" 
+            p="xl" 
+            style={{ 
+              background: 'rgba(34, 197, 94, 0.15)',
+              border: '4px solid #22c55e',
+              boxShadow: '0 0 20px rgba(34, 197, 94, 0.3), inset -4px -4px #1a1a1a, inset 4px 4px #555',
+            }}
+          >
+            <Stack gap="md" align="center">
+              <Text className="mc-font" size="xs" c="dimmed" style={{ fontSize: '8px' }}>
+                📋 SERVER-IP
+              </Text>
+              <Text 
+                className="mc-font" 
+                style={{ 
+                  fontSize: '20px', 
+                  color: '#22c55e',
+                  textShadow: '2px 2px #000',
+                  userSelect: 'all',
+                  letterSpacing: '2px'
+                }}
+              >
+                mc.sd-rp.de
+              </Text>
+              <Badge 
+                color="green" 
+                size="lg" 
+                radius={0} 
+                className="mc-font"
+                style={{ fontSize: '8px' }}
+              >
+                ✅ IN_ZWISCHENABLAGE_KOPIERT
+              </Badge>
+            </Stack>
+          </Paper>
+
+          {/* ANLEITUNG */}
+          <Stack gap="md">
+            <Group gap="xs">
+              <Text className="mc-font" size="sm" c="green" style={{ fontSize: '12px' }}>
+                📌 ANLEITUNG:
+              </Text>
+            </Group>
+            
+            <Paper className="mc-panel" p="md">
+              <Stack gap="sm">
+                <Group gap="sm" wrap="nowrap" align="flex-start">
+                  <Text className="mc-font" c="green" style={{ fontSize: '14px' }}>1.</Text>
+                  <Text className="standard-font" size="sm">
+                    Öffne <strong>Minecraft Java Edition</strong>
+                  </Text>
+                </Group>
+                <Group gap="sm" wrap="nowrap" align="flex-start">
+                  <Text className="mc-font" c="green" style={{ fontSize: '14px' }}>2.</Text>
+                  <Text className="standard-font" size="sm">
+                    Klicke auf <strong>"Multiplayer"</strong>
+                  </Text>
+                </Group>
+                <Group gap="sm" wrap="nowrap" align="flex-start">
+                  <Text className="mc-font" c="green" style={{ fontSize: '14px' }}>3.</Text>
+                  <Text className="standard-font" size="sm">
+                    Klicke auf <strong>"Direkte Verbindung"</strong>
+                  </Text>
+                </Group>
+                <Group gap="sm" wrap="nowrap" align="flex-start">
+                  <Text className="mc-font" c="green" style={{ fontSize: '14px' }}>4.</Text>
+                  <Text className="standard-font" size="sm">
+                    Füge die Server-IP ein <strong>(STRG+V)</strong>
+                  </Text>
+                </Group>
+                <Group gap="sm" wrap="nowrap" align="flex-start">
+                  <Text className="mc-font" c="green" style={{ fontSize: '14px' }}>5.</Text>
+                  <Text className="standard-font" size="sm">
+                    Klicke auf <strong>"Server beitreten"</strong>
+                  </Text>
+                </Group>
+              </Stack>
+            </Paper>
+          </Stack>
+
+          {/* WICHTIGE INFOS */}
+          <Paper 
+            className="mc-panel" 
+            p="lg"
+            style={{ 
+              background: 'rgba(239, 68, 68, 0.15)',
+              border: '4px solid #ef4444',
+              boxShadow: '0 0 15px rgba(239, 68, 68, 0.3), inset -4px -4px #1a1a1a, inset 4px 4px #555',
+            }}
+          >
+            <Stack gap="sm">
+              <Group gap="xs">
+                <IconAlertTriangle size={20} color="#ef4444" />
+                <Text className="mc-font" size="sm" c="red" style={{ fontSize: '11px' }}>
+                  WICHTIG:
+                </Text>
+              </Group>
+              <Stack gap="xs">
+                <Group gap="xs">
+                  <Text className="mc-font" c="red" style={{ fontSize: '10px' }}>•</Text>
+                  <Text className="standard-font" size="xs" c="dimmed">
+                    <strong>Minecraft Version:</strong> 1.21+ erforderlich
+                  </Text>
+                </Group>
+                <Group gap="xs">
+                  <Text className="mc-font" c="red" style={{ fontSize: '10px' }}>•</Text>
+                  <Text className="standard-font" size="xs" c="dimmed">
+                    <strong>Java Edition</strong> wird benötigt (nicht Bedrock!)
+                  </Text>
+                </Group>
+                <Group gap="xs">
+                  <Text className="mc-font" c="red" style={{ fontSize: '10px' }}>•</Text>
+                  <Text className="standard-font" size="xs" c="dimmed">
+                    <strong>Whitelist aktiv:</strong> Tritt Discord bei für Freischaltung
+                  </Text>
+                </Group>
+              </Stack>
+            </Stack>
+          </Paper>
+
+          {/* BUTTONS */}
+          <Group justify="center" gap="md">
+            <Button 
+              className="mc-nav-btn mc-font mc-nav-btn-server"
+              leftSection={<IconCar size={18}/>}
+              onClick={() => {
+                navigator.clipboard.writeText('mc.sd-rp.de');
+                notifications.show({
+                  title: 'Erneut kopiert!',
+                  message: 'mc.sd-rp.de in Zwischenablage',
+                  color: 'green',
+                  autoClose: 2000,
+                });
+              }}
+            >
+              ERNEUT KOPIEREN
+            </Button>
+            
+            <Button 
+              className="mc-nav-btn mc-font mc-nav-btn-discord"
+              leftSection={<IconBrandDiscord size={18}/>}
+              component="a"
+              href="https://discord.gg/PaPe5WA3kz"
+              target="_blank"
+            >
+              DISCORD
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700&display=swap');
         
@@ -596,17 +785,9 @@ function App() {
                 <Button 
                   className="mc-nav-btn mc-font mc-nav-btn-server"
                   leftSection={<IconCar size={18}/>}
-                  component="a" 
-                  href="#" 
-                  onClick={(e) => {
-                    e.preventDefault();
+                  onClick={() => {
                     navigator.clipboard.writeText('mc.sd-rp.de');
-                    notifications.show({
-                      title: 'Server-IP kopiert!',
-                      message: 'mc.sd-rp.de wurde in die Zwischenablage kopiert',
-                      color: 'green',
-                      autoClose: 3000,
-                    });
+                    setJoinModalOpened(true);
                   }}
                 >
                   JOIN SERVER
