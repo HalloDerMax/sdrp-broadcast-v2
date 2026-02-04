@@ -561,8 +561,8 @@ function App() {
       <AppShell header={{ height: 100 }} padding="md">
         <AppShell.Header withBorder={false}>
           <Container size="xl" h="100%">
-            <Group justify="space-between" h="100%" wrap="nowrap">
-              <Group gap="xl">
+            <Group justify="space-between" h="100%" wrap="nowrap" align="center">
+              <Group gap="xl" align="center">
                 <Title order={3} className="mc-font" style={{ fontSize: '14px', color: '#48bb78', textShadow: '2px 2px #000' }}>
                   Second Dimension<br/>
                   <Text span c="white" inherit style={{ fontSize: '10px' }}>MINECRAFT HARDCORE</Text>
@@ -578,7 +578,7 @@ function App() {
                 </Box>
               </Group>
 
-              <Group gap="lg">
+              <Group gap="md">
                 <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
                   leftSection={<IconBroadcast size={18}/>}
