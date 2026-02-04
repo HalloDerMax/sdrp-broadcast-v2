@@ -41,35 +41,52 @@ function PlayersPage() {
 
   const fetchPlayers = async () => {
     try {
-      // ECHTE API ABFRAGE
+      // ECHTE API ABFRAGE - Minecraft Players
       const response = await axios.get(`${API_BASE}/api/minecraft/players`);
-      const playersData = response.data.players || [];
+      const apiData = response.data;
       
-      // Verarbeite und normalisiere die Daten
-      const processedPlayers = playersData.map((player, index) => ({
-        id: player.id || index,
-        username: player.username || player.name || player.player || 'Unknown',
-        lives: player.lives !== undefined ? player.lives : 3,
-        kills: player.kills || 0,
-        deaths: player.deaths || 0,
-        playTime: player.playTime || player.playtime || '0h',
-        status: player.status || (player.lives === 0 ? 'eliminated' : 'offline'),
-        lastDeath: player.lastDeath || player.last_death || null
+      // Direktes Mapping der API-Daten (keine Platzhalter mehr!)
+      const playersData = apiData.players || [];
+      
+      if (playersData.length === 0) {
+        console.warn('⚠️ No players found in API response');
+        setPlayers([]);
+        return;
+      }
+      
+      // Normalisiere nur die Struktur, aber nutze echte Daten
+      const processedPlayers = playersData.map((player) => ({
+        id: player.id,
+        username: player.username,
+        lives: player.lives, // Echte Leben-Daten von API
+        kills: player.kills,
+        deaths: player.deaths,
+        playTime: player.playTime,
+        status: player.status,
+        lastDeath: player.lastDeath
       }));
       
       setPlayers(processedPlayers);
-      console.log('✅ Players loaded:', processedPlayers.length);
+      console.log('✅ Players loaded from API:', processedPlayers.length);
+      console.log('📊 Stats:', {
+        total: processedPlayers.length,
+        alive: processedPlayers.filter(p => p.lives > 0).length,
+        eliminated: processedPlayers.filter(p => p.lives === 0).length
+      });
     } catch (error) {
       console.error('❌ Error fetching players:', error);
+      console.error('   API Base:', API_BASE);
+      console.error('   Endpoint:', `${API_BASE}/api/minecraft/players`);
       
-      // FALLBACK: Zeige leere Liste oder minimale Mockup-Daten
+      // Bei Fehler: Leere Liste (keine Fallback-Daten)
       setPlayers([]);
       
-      // Optional: Notification anzeigen
+      // Notification nur bei Fehler zeigen
       notifications.show({
-        title: 'Fehler beim Laden',
-        message: 'Spieler-Daten konnten nicht geladen werden',
+        title: 'API Fehler',
+        message: 'Konnte Spieler-Daten nicht laden. Bitte Server prüfen.',
         color: 'red',
+        autoClose: 5000,
       });
     }
   };
