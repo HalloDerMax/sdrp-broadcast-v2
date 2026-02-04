@@ -367,10 +367,12 @@ function PlayersPage() {
               <Divider style={{ width: '100%' }} />
 
               <Box style={{ width: '100%' }}>
-              <Text ta="center">LEBEN: {player.lives}/3</Text>
-              <Group gap="xs" justify="center" mt="xs" style={{ width: '100%' }}>
-              {renderHearts(player.lives)}
-              </Group>
+                <Text className="mc-font" size="xs" ta="center" c="dimmed" style={{fontSize: '7px'}}>
+                  LEBEN: {player.lives}/3
+                </Text>
+                <Group gap="xs" justify="center" mt="xs" style={{ width: '100%' }}>
+                  {renderHearts(player.lives)}
+                </Group>
               </Box>
 
               <Divider style={{ width: '100%' }} />
@@ -535,6 +537,8 @@ function App() {
 
         .mc-nav-btn-discord { background: #5865F2; box-shadow: inset -4px -4px #3d46a8, inset 4px 4px #8a94ff !important; }
         
+        .mc-nav-btn-server { background: #22c55e; box-shadow: inset -4px -4px #16a34a, inset 4px 4px #4ade80 !important; }
+        
         .timer-block { background: rgba(0,0,0,0.8); border: 3px solid #555; box-shadow: inset -2px -2px #222, inset 2px 2px #888; padding: 8px 12px; min-width: 220px; }
         
         .mc-panel { 
@@ -589,9 +593,33 @@ function App() {
                 >
                   DASHBOARD
                 </Button>
-                <ActionIcon className="mc-nav-btn mc-nav-btn-discord" size="xl" component="a" href="https://discord.gg/PaPe5WA3kz" target="_blank">
-                  <IconBrandDiscord size={24}/>
-                </ActionIcon>
+                <Button 
+                  className="mc-nav-btn mc-font mc-nav-btn-server"
+                  leftSection={<IconCar size={18}/>}
+                  component="a" 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigator.clipboard.writeText('mc.sd-rp.de');
+                    notifications.show({
+                      title: 'Server-IP kopiert!',
+                      message: 'mc.sd-rp.de wurde in die Zwischenablage kopiert',
+                      color: 'green',
+                      autoClose: 3000,
+                    });
+                  }}
+                >
+                  JOIN SERVER
+                </Button>
+                <Button 
+                  className="mc-nav-btn mc-font mc-nav-btn-discord"
+                  leftSection={<IconBrandDiscord size={18}/>}
+                  component="a" 
+                  href="https://discord.gg/PaPe5WA3kz" 
+                  target="_blank"
+                >
+                  DISCORD
+                </Button>
               </Group>
             </Group>
           </Container>
