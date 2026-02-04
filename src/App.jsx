@@ -1015,7 +1015,7 @@ function App() {
                 </Group>
                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg" mb="lg">
                   <Card className="sd-card" p="xl">
-                    <Group mb="md"><ThemeIcon color="orange" variant="light" size="lg"><IconBroadcast size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Hardcore</Text></Group>
+                    <Group mb="md"><ThemeIcon color="orange" variant="light" size="lg"><IconBroadcast size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Infos</Text></Group>
                     <Text size="xs" className="standard-font" c="#8b949e">🟩 Minecraft Hardcore Event – Regeln & Infos
 
 🔒 Zutritt nur über Whitelist
