@@ -366,13 +366,11 @@ function PlayersPage() {
 
               <Divider style={{ width: '100%' }} />
 
-              <Box>
-                <Text className="mc-font" size="xs" ta="center" c="dimmed" style={{fontSize: '7px'}}>
-                  LEBEN: {player.lives}/3
-                </Text>
-                <Group gap="xs" justify="center" mt="xs">
-                  {renderHearts(player.lives)}
-                </Group>
+              <Box style={{ width: '100%' }}>
+              <Text ta="center">LEBEN: {player.lives}/3</Text>
+              <Group gap="xs" justify="center" mt="xs" style={{ width: '100%' }}>
+              {renderHearts(player.lives)}
+              </Group>
               </Box>
 
               <Divider style={{ width: '100%' }} />
