@@ -1043,7 +1043,17 @@ Wenn du das Event streamst, melde dich bitte im Discord, damit dein Stream auf d
                     <Title className="mc-font" order={2} style={{ fontSize: '18px', textShadow: '2px 2px #000', textAlign: 'center' }}>Bereit für Second Dimension?</Title>
                     <Group mt="lg">
                       <Button size="lg" className="mc-nav-btn mc-font mc-nav-btn-discord" component="a" href="https://discord.gg/PaPe5WA3kz" target="_blank">DISCORD</Button>
-                      <Button size="lg" className="mc-nav-btn mc-font" style={{background: '#388E3C'}}>BEITRETEN</Button>
+                      <Button 
+  size="lg" 
+  className="mc-nav-btn mc-font mc-nav-btn-server"
+  leftSection={<IconCar size={18}/>}
+  onClick={() => {
+    navigator.clipboard.writeText('mc.sd-rp.de');
+    setJoinModalOpened(true);
+  }}
+>
+  JOIN SERVER
+</Button>
                     </Group>
                   </Stack>
                 </Paper>
