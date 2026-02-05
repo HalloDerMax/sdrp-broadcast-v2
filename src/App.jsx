@@ -1011,7 +1011,7 @@ function App() {
                   className={`mc-nav-btn mc-font ${currentPage === 'dashboard' ? 'active' : ''}`}
                   leftSection={<IconHeart size={16}/>}
                   onClick={() => setCurrentPage('dashboard')}
-                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
+                  style={{ fontSize: '12px', height: '45px', padding: '0 16px' }}
                 >
                   DASHBOARD
                 </Button>
