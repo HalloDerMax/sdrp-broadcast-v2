@@ -1003,7 +1003,7 @@ function App() {
                   className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
                   leftSection={<IconBroadcast size={16}/>}
                   onClick={() => setCurrentPage('home')}
-                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
+                  style={{ fontSize: '12px', height: '45px', padding: '0 16px' }}
                 >
                   LIVE
                 </Button>
@@ -1023,7 +1023,7 @@ function App() {
                       setJoinModalOpened(true);
                     });
                   }}
-                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
+                  style={{ fontSize: '12px', height: '45px', padding: '0 16px' }}
                 >
                   JOIN SERVER
                 </Button>
@@ -1033,7 +1033,7 @@ function App() {
                   component="a" 
                   href="https://discord.gg/PaPe5WA3kz" 
                   target="_blank"
-                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
+                  style={{ fontSize: '15px', height: '45px', padding: '0 16px' }}
                 >
                   DISCORD
                 </Button>
