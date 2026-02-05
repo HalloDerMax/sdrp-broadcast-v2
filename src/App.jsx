@@ -131,6 +131,10 @@ function LeaderboardPage() {
   // Calculate ranking: Only alive players, sorted by PlayTime (desc) then Lives (desc)
  // Calculate ranking: Sorted by PlayTime (desc) then Lives (desc)
 const rankedPlayers = [...players]
+  .map(player => ({
+    ...player,
+    playTimeMinutes: parsePlaytimeToMinutes(player.playTime) // ← Neu berechnen!
+  }))
   .sort((a, b) => {
     console.log(`Vergleich: ${a.username} (${a.playTimeMinutes} min, ${a.lives} ❤️) vs ${b.username} (${b.playTimeMinutes} min, ${b.lives} ❤️)`);
     
