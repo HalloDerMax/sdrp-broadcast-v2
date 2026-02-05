@@ -991,7 +991,7 @@ function App() {
                     <IconClock size={12} color="#f1e05a" />
                     <Stack gap={0}>
                       <Text className="mc-font" style={{ fontSize: '8px' }} c="dimmed">{timeLabel}</Text>
-                      <Text className="mc-font" style={{ fontSize: '12px', color: '#f1e05a' }}>{timeValue}</Text>
+                      <Text className="mc-font" style={{ fontSize: '10px', color: '#f1e05a' }}>{timeValue}</Text>
                     </Stack>
                   </Group>
                 </Box>
