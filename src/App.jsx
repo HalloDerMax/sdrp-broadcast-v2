@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   MantineProvider, AppShell, Container, Title, Group, Badge, Card, SimpleGrid, 
   Text, Button, Stack, Avatar, Image, Modal, ActionIcon, Paper, Box, 
-  createTheme, ScrollArea, TextInput, PasswordInput, ThemeIcon, Divider, Progress, Select
+  createTheme, ScrollArea, TextInput, PasswordInput, ThemeIcon, Divider, Progress, Select,
+  Burger, Drawer
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { 
   IconBrandDiscord, IconUsers, IconBroadcast, IconCircleFilled, IconCar, IconAlertTriangle, 
   IconPaw, IconClock, IconSkull, IconHeart, IconHeartBroken, IconSearch, IconFilter, 
-  IconSword, IconShield, IconTrophy
+  IconSword, IconShield, IconTrophy, IconMenu2
 } from '@tabler/icons-react';
 import axios from 'axios';
 import { notifications, Notifications } from '@mantine/notifications';
@@ -437,6 +439,7 @@ function App() {
   const [timeValue, setTimeValue] = useState('');
   const [currentPage, setCurrentPage] = useState('home');
   const [joinModalOpened, setJoinModalOpened] = useState(false);
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
   useEffect(() => {
     const updateTimer = () => {
@@ -489,6 +492,74 @@ function App() {
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <Notifications position="top-right" />
       
+      {/* MOBILE DRAWER MENU */}
+      <Drawer
+        opened={drawerOpened}
+        onClose={closeDrawer}
+        title={
+          <Text className="mc-font" style={{ fontSize: '12px', color: '#48bb78' }}>
+            MENU
+          </Text>
+        }
+        padding="xl"
+        size="80%"
+        styles={{
+          header: {
+            background: 'rgba(34, 34, 34, 0.95)',
+            borderBottom: '4px solid #000',
+          },
+          body: {
+            background: 'rgba(34, 34, 34, 0.95)',
+          },
+          content: {
+            border: '4px solid #000',
+          },
+        }}
+      >
+        <Stack gap="md">
+          <Button 
+            fullWidth
+            className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
+            leftSection={<IconBroadcast size={18}/>}
+            onClick={() => { setCurrentPage('home'); closeDrawer(); }}
+          >
+            LIVE
+          </Button>
+          <Button 
+            fullWidth
+            className={`mc-nav-btn mc-font ${currentPage === 'dashboard' ? 'active' : ''}`}
+            leftSection={<IconHeart size={18}/>}
+            onClick={() => { setCurrentPage('dashboard'); closeDrawer(); }}
+          >
+            DASHBOARD
+          </Button>
+          <Button 
+            fullWidth
+            className="mc-nav-btn mc-font mc-nav-btn-server"
+            leftSection={<IconCar size={18}/>}
+            onClick={() => {
+              copyToClipboard('mc.sd-rp.de').then(() => {
+                setJoinModalOpened(true);
+                closeDrawer();
+              });
+            }}
+          >
+            JOIN SERVER
+          </Button>
+          <Button 
+            fullWidth
+            className="mc-nav-btn mc-font mc-nav-btn-discord"
+            leftSection={<IconBrandDiscord size={18}/>}
+            component="a" 
+            href="https://discord.gg/PaPe5WA3kz" 
+            target="_blank"
+            onClick={closeDrawer}
+          >
+            DISCORD
+          </Button>
+        </Stack>
+      </Drawer>
+
       <Modal
         opened={joinModalOpened}
         onClose={() => setJoinModalOpened(false)}
@@ -840,7 +911,6 @@ function App() {
           border: 3px solid #555; 
           box-shadow: inset -2px -2px #222, inset 2px 2px #888; 
           padding: 8px 12px; 
-          min-width: 180px;
         }
         
         .mc-panel { 
@@ -863,132 +933,108 @@ function App() {
           border-radius: 10px; 
         }
 
-        /* RESPONSIVE BREAKPOINTS */
-        @media (max-width: 1400px) {
-          .mc-nav-btn {
-            font-size: 9px !important;
-            height: 48px !important;
-            padding: 0 16px !important;
-          }
+        /* BURGER BUTTON */
+        .mantine-Burger-root {
+          border: 4px solid #000 !important;
+          background: #7c7c7c !important;
+          box-shadow: inset -4px -4px #5a5a5a, inset 4px 4px #b8b8b8 !important;
         }
 
-        @media (max-width: 1200px) {
-          .mc-nav-btn {
-            font-size: 8px !important;
-            height: 45px !important;
-            padding: 0 14px !important;
-          }
-          .mc-nav-btn svg {
-            width: 16px !important;
-            height: 16px !important;
-          }
+        /* RESPONSIVE */
+        @media (min-width: 992px) {
+          .desktop-nav { display: flex !important; }
+          .mobile-burger { display: none !important; }
         }
 
-        @media (max-width: 992px) {
-          .mc-nav-btn {
-            font-size: 7px !important;
-            height: 42px !important;
-            padding: 0 12px !important;
-          }
-          .mc-nav-btn svg {
-            width: 15px !important;
-            height: 15px !important;
-          }
+        @media (max-width: 991px) {
+          .desktop-nav { display: none !important; }
+          .mobile-burger { display: block !important; }
           .timer-block {
-            min-width: 150px;
+            font-size: 10px;
             padding: 6px 10px;
           }
         }
 
         @media (max-width: 768px) {
-          .mc-nav-btn {
-            font-size: 6px !important;
-            height: 38px !important;
-            padding: 0 10px !important;
-          }
-          .mc-nav-btn svg {
-            width: 13px !important;
-            height: 13px !important;
-          }
-          .timer-block {
-            display: none;
-          }
           .mantine-AppShell-header {
             height: auto !important;
-            padding: 10px 0 !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .mc-nav-btn {
-            font-size: 5px !important;
-            height: 34px !important;
-            padding: 0 8px !important;
-          }
-          .mc-nav-btn svg {
-            width: 11px !important;
-            height: 11px !important;
+            padding: 12px 0 !important;
           }
         }
       `}} />
 
-      <AppShell header={{ height: 140 }} padding="md">
+      <AppShell header={{ height: { base: 80, md: 100 } }} padding="md">
         <AppShell.Header withBorder={false}>
-          <Container size="xl" py="md">
-            <Stack gap="lg">
-              <Group justify="space-between" wrap="nowrap" align="center">
-                <Title order={3} className="mc-font" style={{ fontSize: '12px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.4 }}>
+          <Container size="xl" h="100%">
+            <Group h="100%" justify="space-between" wrap="nowrap" align="center">
+              {/* LOGO + TIMER */}
+              <Stack gap="xs" style={{ flex: 1 }}>
+                <Title order={3} className="mc-font" style={{ fontSize: '12px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
                   Second Dimension<br/>
                   <Text span c="white" inherit style={{ fontSize: '9px' }}>MINECRAFT HARDCORE</Text>
                 </Title>
                 <Box className="timer-block">
-                   <Group gap="xs" wrap="nowrap">
-                      <IconClock size={14} color="#f1e05a" />
-                      <Stack gap={0}>
-                        <Text className="mc-font" style={{ fontSize: '6px' }} c="dimmed">{timeLabel}</Text>
-                        <Text className="mc-font" style={{ fontSize: '9px', color: '#f1e05a' }}>{timeValue}</Text>
-                      </Stack>
-                   </Group>
+                  <Group gap="xs" wrap="nowrap">
+                    <IconClock size={12} color="#f1e05a" />
+                    <Stack gap={0}>
+                      <Text className="mc-font" style={{ fontSize: '6px' }} c="dimmed">{timeLabel}</Text>
+                      <Text className="mc-font" style={{ fontSize: '8px', color: '#f1e05a' }}>{timeValue}</Text>
+                    </Stack>
+                  </Group>
                 </Box>
-              </Group>
+              </Stack>
 
-              <Group gap="sm" justify="center" style={{ flexWrap: 'wrap' }}>
+              {/* DESKTOP NAVIGATION */}
+              <Group className="desktop-nav" gap="sm">
                 <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
-                  leftSection={<IconBroadcast size={18}/>}
+                  leftSection={<IconBroadcast size={16}/>}
                   onClick={() => setCurrentPage('home')}
+                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
                 >
                   LIVE
                 </Button>
                 <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'dashboard' ? 'active' : ''}`}
-                  leftSection={<IconHeart size={18}/>}
+                  leftSection={<IconHeart size={16}/>}
                   onClick={() => setCurrentPage('dashboard')}
+                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
                 >
                   DASHBOARD
                 </Button>
                 <Button 
                   className="mc-nav-btn mc-font mc-nav-btn-server"
-                  leftSection={<IconCar size={18}/>}
+                  leftSection={<IconCar size={16}/>}
                   onClick={() => {
                     copyToClipboard('mc.sd-rp.de').then(() => {
                       setJoinModalOpened(true);
                     });
                   }}
+                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
                 >
                   JOIN SERVER
                 </Button>
                 <Button 
                   className="mc-nav-btn mc-font mc-nav-btn-discord"
-                  leftSection={<IconBrandDiscord size={18}/>}
+                  leftSection={<IconBrandDiscord size={16}/>}
                   component="a" 
                   href="https://discord.gg/PaPe5WA3kz" 
                   target="_blank"
+                  style={{ fontSize: '8px', height: '45px', padding: '0 16px' }}
                 >
                   DISCORD
                 </Button>
               </Group>
-            </Stack>
+
+              {/* MOBILE BURGER MENU */}
+              <Burger 
+                className="mobile-burger"
+                opened={drawerOpened}
+                onClick={openDrawer}
+                size="md"
+                color="#fff"
+              />
+            </Group>
           </Container>
         </AppShell.Header>
 
