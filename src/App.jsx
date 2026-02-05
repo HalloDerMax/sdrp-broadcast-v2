@@ -338,7 +338,7 @@ function LeaderboardPage() {
                   </Stack>
                 </SimpleGrid>
                 <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>
-                  SCORE: {rankedPlayers[1].score}
+                  SPIELZEIT: {rankedPlayers[1].playTimeMinutes} MIN
                 </Text>
               </Stack>
             </Card>
@@ -419,7 +419,7 @@ function LeaderboardPage() {
                   }}
                 >
                   <Text className="mc-font" size="xs" c="yellow" ta="center" style={{fontSize: '8px'}}>
-                    ⭐ SCORE: {rankedPlayers[0].score}
+                    ⭐ SPIELZEIT: {rankedPlayers[0].playTimeMinutes} MIN
                   </Text>
                 </Paper>
               </Stack>
