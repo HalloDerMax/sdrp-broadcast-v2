@@ -135,6 +135,8 @@ function LeaderboardPage() {
       score: (player.playTimeMinutes * 10) + player.lives
     }))
     .sort((a, b) => {
+      console.log(`Vergleich: ${a.username} (${a.playTimeMinutes} min, ${a.lives} ❤️) vs ${b.username} (${b.playTimeMinutes} min, ${b.lives} ❤️)`);
+      
       // Sortiere zuerst nach Spielzeit (absteigend)
       if (b.playTimeMinutes !== a.playTimeMinutes) {
         return b.playTimeMinutes - a.playTimeMinutes;
