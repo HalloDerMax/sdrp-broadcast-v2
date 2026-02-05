@@ -128,11 +128,11 @@ function LeaderboardPage() {
     }
   };
 
-  // Calculate ranking score: Lives * 1000 + PlayTimeMinutes
+  // Calculate ranking score: PlayTimeMinutes * 10 + Lives
   const rankedPlayers = [...players]
     .map(player => ({
       ...player,
-      score: (player.lives * 1000) + player.playTimeMinutes
+      score: (player.playTimeMinutes * 10) + player.lives
     }))
     .sort((a, b) => b.score - a.score);
 
@@ -487,7 +487,7 @@ function LeaderboardPage() {
           </Text>
         </Group>
         <Text className="standard-font" size="xs" c="dimmed" mb="md">
-          Bewertung: Leben × 1000 + Spielzeit (Minuten)
+          Bewertung: Spielzeit (Minuten) × 10 + Leben
         </Text>
       </Paper>
 
@@ -1595,11 +1595,11 @@ function App() {
                 </Button>
                 <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'leaderboard' ? 'active' : ''}`}
-                  leftSection={<IconSkull size={16}/>}
                   onClick={() => setCurrentPage('leaderboard')}
-                  style={{ fontSize: '12px', height: '45px', padding: '0 16px' }}
+                  style={{ fontSize: '12px', height: '45px', padding: '0 12px', minWidth: '45px' }}
+                  title="Bestenliste"
                 >
-                  BESTENLISTE
+                  <IconSkull size={20}/>
                 </Button>
                 <Button 
                   className="mc-nav-btn mc-font mc-nav-btn-server"
