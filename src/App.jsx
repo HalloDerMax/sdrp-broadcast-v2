@@ -25,6 +25,34 @@ const theme = createTheme({
 });
 
 // ============================================
+// CLIPBOARD HELPER FUNCTION (HTTPS + HTTP)
+// ============================================
+const copyToClipboard = (text) => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    // Modern Clipboard API (nur HTTPS)
+    return navigator.clipboard.writeText(text);
+  } else {
+    // Fallback für HTTP
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+    document.body.removeChild(textArea);
+    return Promise.resolve();
+  }
+};
+
+// ============================================
 // PLAYERS PAGE COMPONENT
 // ============================================
 function PlayersPage() {
@@ -37,7 +65,6 @@ function PlayersPage() {
 
   useEffect(() => {
     fetchPlayers();
-    // Auto-Refresh alle 30 Sekunden
     const interval = setInterval(() => {
       fetchPlayers();
       setLastUpdate(new Date());
@@ -48,11 +75,8 @@ function PlayersPage() {
   const fetchPlayers = async () => {
     try {
       setIsRefreshing(true);
-      // ECHTE API ABFRAGE - Minecraft Players
       const response = await axios.get(`${API_BASE}/api/minecraft/players`);
       const apiData = response.data;
-      
-      // Direktes Mapping der API-Daten (keine Platzhalter mehr!)
       const playersData = apiData.players || [];
       
       if (playersData.length === 0) {
@@ -62,11 +86,10 @@ function PlayersPage() {
         return;
       }
       
-      // Normalisiere nur die Struktur, aber nutze echte Daten
       const processedPlayers = playersData.map((player) => ({
         id: player.id,
         username: player.username,
-        lives: player.lives, // Echte Leben-Daten von API
+        lives: player.lives,
         kills: player.kills,
         deaths: player.deaths,
         playTime: player.playTime,
@@ -76,25 +99,13 @@ function PlayersPage() {
       
       setPlayers(processedPlayers);
       setIsRefreshing(false);
-      console.log('✅ Players loaded from API:', processedPlayers.length);
-      console.log('📊 Stats:', {
-        total: processedPlayers.length,
-        alive: processedPlayers.filter(p => p.lives > 0).length,
-        eliminated: processedPlayers.filter(p => p.lives === 0).length
-      });
     } catch (error) {
       setIsRefreshing(false);
       console.error('❌ Error fetching players:', error);
-      console.error('   API Base:', API_BASE);
-      console.error('   Endpoint:', `${API_BASE}/api/minecraft/players`);
-      
-      // Bei Fehler: Leere Liste (keine Fallback-Daten)
       setPlayers([]);
-      
-      // Notification nur bei Fehler zeigen
       notifications.show({
         title: 'API Fehler',
-        message: 'Konnte Spieler-Daten nicht laden. Bitte Server prüfen.',
+        message: 'Konnte Spieler-Daten nicht laden.',
         color: 'red',
         autoClose: 5000,
       });
@@ -184,7 +195,6 @@ function PlayersPage() {
         }
       `}} />
 
-      {/* HEADER */}
       <Group mb="xl" justify="space-between">
         <Group>
           <IconHeart size={32} color="#ef4444" />
@@ -208,7 +218,6 @@ function PlayersPage() {
         </Paper>
       </Group>
 
-      {/* STATS */}
       <SimpleGrid cols={{ base: 2, sm: 3, md: 6 }} spacing="md" mb="xl">
         <Paper className="mc-panel" p="md">
           <Stack gap={5} align="center">
@@ -260,15 +269,14 @@ function PlayersPage() {
         </Paper>
       </SimpleGrid>
 
-      {/* FILTERS */}
       <Paper className="mc-panel" p="md" mb="xl">
-        <Group>
+        <Group style={{ flexWrap: 'wrap' }}>
           <TextInput
             placeholder="Spieler suchen..."
             leftSection={<IconSearch size={16} />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flex: 1 }}
+            style={{ flex: 1, minWidth: '200px' }}
             styles={{input: {background: 'rgba(0,0,0,0.5)', border: '2px solid #333'}}}
           />
           <Select
@@ -303,7 +311,6 @@ function PlayersPage() {
         </Group>
       </Paper>
 
-      {/* PLAYERS GRID */}
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="lg">
         {filteredPlayers.map((player) => (
           <Card 
@@ -430,7 +437,7 @@ function App() {
   const [selectedStream, setSelectedStream] = useState(null);
   const [timeLabel, setTimeLabel] = useState('');
   const [timeValue, setTimeValue] = useState('');
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' or 'dashboard'
+  const [currentPage, setCurrentPage] = useState('home');
   const [joinModalOpened, setJoinModalOpened] = useState(false);
 
   useEffect(() => {
@@ -484,7 +491,6 @@ function App() {
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <Notifications position="top-right" />
       
-      {/* JOIN SERVER MODAL */}
       <Modal
         opened={joinModalOpened}
         onClose={() => setJoinModalOpened(false)}
@@ -518,7 +524,6 @@ function App() {
         }}
       >
         <Stack gap="xl">
-          {/* SERVER IP BOX */}
           <Paper 
             className="mc-panel" 
             p="xl" 
@@ -556,7 +561,6 @@ function App() {
             </Stack>
           </Paper>
 
-          {/* ANLEITUNG */}
           <Stack gap="md">
             <Group gap="xs">
               <Text className="mc-font" size="sm" c="green" style={{ fontSize: '12px' }}>
@@ -600,7 +604,6 @@ function App() {
             </Paper>
           </Stack>
 
-          {/* WICHTIGE INFOS */}
           <Paper 
             className="mc-panel" 
             p="lg"
@@ -640,7 +643,6 @@ function App() {
             </Stack>
           </Paper>
 
-          {/* VOICE PLUGIN */}
           <Paper 
             className="mc-panel" 
             p="lg"
@@ -683,7 +685,6 @@ function App() {
                 </Group>
               </Stack>
 
-              {/* CODE CTA BOX */}
               <Paper
                 p="md"
                 style={{
@@ -694,12 +695,13 @@ function App() {
                   transition: 'all 0.2s',
                 }}
                 onClick={() => {
-                  navigator.clipboard.writeText('1fVzzMey');
-                  notifications.show({
-                    title: 'Code kopiert!',
-                    message: '1fVzzMey wurde kopiert',
-                    color: 'yellow',
-                    autoClose: 2000,
+                  copyToClipboard('1fVzzMey').then(() => {
+                    notifications.show({
+                      title: 'Code kopiert!',
+                      message: '1fVzzMey wurde kopiert',
+                      color: 'yellow',
+                      autoClose: 2000,
+                    });
                   });
                 }}
                 onMouseEnter={(e) => {
@@ -741,18 +743,18 @@ function App() {
             </Stack>
           </Paper>
 
-          {/* BUTTONS */}
-          <Group justify="center" gap="md">
+          <Group justify="center" gap="md" style={{ flexWrap: 'wrap' }}>
             <Button 
               className="mc-nav-btn mc-font mc-nav-btn-server"
               leftSection={<IconCar size={18}/>}
               onClick={() => {
-                navigator.clipboard.writeText('mc.sd-rp.de');
-                notifications.show({
-                  title: 'Erneut kopiert!',
-                  message: 'mc.sd-rp.de in Zwischenablage',
-                  color: 'green',
-                  autoClose: 2000,
+                copyToClipboard('mc.sd-rp.de').then(() => {
+                  notifications.show({
+                    title: 'Erneut kopiert!',
+                    message: 'mc.sd-rp.de in Zwischenablage',
+                    color: 'green',
+                    autoClose: 2000,
+                  });
                 });
               }}
             >
@@ -846,13 +848,41 @@ function App() {
         .pixel-border { border: 2px solid #000; image-rendering: pixelated; }
         .sd-card { background: rgba(22, 27, 34, 0.9); border: 1px solid #30363d; border-radius: 8px; }
         .sd-footer-box { background: linear-gradient(180deg, rgba(61, 43, 43, 0.9) 0%, rgba(43, 26, 26, 0.9) 100%); border: 1px solid #6e3636; border-radius: 10px; }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+          .mc-nav-btn {
+            font-size: 7px !important;
+            height: 40px !important;
+            padding: 0 8px !important;
+          }
+          .mc-nav-btn svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .timer-block {
+            min-width: 180px;
+          }
+          .mantine-AppShell-header {
+            height: auto !important;
+            padding: 10px 0 !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .mc-nav-btn {
+            font-size: 6px !important;
+            height: 35px !important;
+            padding: 0 6px !important;
+          }
+        }
       `}} />
 
       <AppShell header={{ height: 100 }} padding="md">
         <AppShell.Header withBorder={false}>
-          <Container size="xl" h="100%">
-            <Group justify="space-between" h="100%" wrap="nowrap" align="center">
-              <Group gap="xl" align="center">
+          <Container size="xl" h="100%" py="xs">
+            <Stack gap="md" h="100%" justify="center">
+              <Group justify="space-between" wrap="nowrap" align="center">
                 <Title order={3} className="mc-font" style={{ fontSize: '14px', color: '#48bb78', textShadow: '2px 2px #000' }}>
                   Second Dimension<br/>
                   <Text span c="white" inherit style={{ fontSize: '10px' }}>MINECRAFT HARDCORE</Text>
@@ -868,7 +898,7 @@ function App() {
                 </Box>
               </Group>
 
-              <Group gap="md">
+              <Group gap="xs" justify="center" style={{ flexWrap: 'wrap' }}>
                 <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
                   leftSection={<IconBroadcast size={18}/>}
@@ -887,8 +917,9 @@ function App() {
                   className="mc-nav-btn mc-font mc-nav-btn-server"
                   leftSection={<IconCar size={18}/>}
                   onClick={() => {
-                    navigator.clipboard.writeText('mc.sd-rp.de');
-                    setJoinModalOpened(true);
+                    copyToClipboard('mc.sd-rp.de').then(() => {
+                      setJoinModalOpened(true);
+                    });
                   }}
                 >
                   JOIN SERVER
@@ -903,7 +934,7 @@ function App() {
                   DISCORD
                 </Button>
               </Group>
-            </Group>
+            </Stack>
           </Container>
         </AppShell.Header>
 
@@ -912,6 +943,7 @@ function App() {
             <PlayersPage />
           ) : (
             <Container size="xl">
+              {/* REST OF HOME PAGE CONTENT - CONTINUING... */}
               <Box mb={30} mt={10}>
                 <Group mb="xs">
                   <IconSkull size={18} color="red" />
@@ -955,7 +987,7 @@ function App() {
 
               {selectedStream && (
                 <Box mb={50} id="live-section">
-                  <Box style={{ display: 'flex', gap: '15px', height: '60vh', alignItems: 'stretch' }}>
+                  <Box style={{ display: 'flex', gap: '15px', height: '60vh', alignItems: 'stretch', flexDirection: window.innerWidth < 992 ? 'column' : 'row' }}>
                     <Box className="mc-panel live-glow" style={{ flex: 1, background: '#000', padding: '4px' }}>
                       <iframe src={`https://player.twitch.tv/?channel=${selectedStream.user_login}&parent=${window.location.hostname}&autoplay=true&muted=true`} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
                     </Box>
@@ -964,7 +996,7 @@ function App() {
                     </Box>
                   </Box>
                   <Paper className="mc-panel" p="md" mt="xs">
-                    <Group justify="space-between">
+                    <Group justify="space-between" style={{ flexWrap: 'wrap' }}>
                       <Group>
                         <Avatar src={`https://minotar.net/avatar/${selectedStream.user_name}/48`} radius={0} className="pixel-border" />
                         <Stack gap={0}><Text fw={900} className="mc-font" size="sm" c="green">{selectedStream.user_name}</Text><Text size="xs" c="dimmed" style={{fontFamily: 'Inter'}}>{selectedStream.title}</Text></Stack>
@@ -1017,33 +1049,29 @@ function App() {
                   <Card className="sd-card" p="xl">
                     <Group mb="md"><ThemeIcon color="orange" variant="light" size="lg"><IconBroadcast size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Infos</Text></Group>
                     <Text size="xs" className="standard-font" c="#8b949e" component="div">
-  <div style={{ marginBottom: '10px' }}>
-    <strong>🟩 Minecraft Hardcore Event – Regeln & Infos</strong>
-  </div>
-
-  <div style={{ marginBottom: '10px' }}>
-    <strong>🔒 Zutritt nur über Whitelist</strong><br />
-    Das Projekt kann ausschließlich über die Whitelist betreten werden.
-  </div>
-
-  <div style={{ marginBottom: '10px' }}>
-    <strong>❤️ Leben-System</strong><br />
-    Jeder Spieler startet mit 3 Leben.<br />
-    Verliert ein Spieler sein drittes Leben, scheidet er aus dem aktiven Spiel aus und ist nur noch Zuschauer.
-  </div>
-
-  <div style={{ marginBottom: '10px' }}>
-    <strong>⚔️ PvP-Regelung</strong><br />
-    Das absichtliche Töten von Mitspielern ohne triftigen Grund ist nicht erlaubt.<br />
-    (Regelverstöße können zu Strafen oder Ausschluss führen.)
-  </div>
-
-  <div>
-    <strong>🎥 Streaming-Hinweis</strong><br />
-    Wenn du das Event streamst, melde dich bitte im Discord, damit dein Stream auf der Projektseite angezeigt werden kann.
-  </div>
-</Text>
-</Card>
+                      <div style={{ marginBottom: '10px' }}>
+                        <strong>🟩 Minecraft Hardcore Event – Regeln & Infos</strong>
+                      </div>
+                      <div style={{ marginBottom: '10px' }}>
+                        <strong>🔒 Zutritt nur über Whitelist</strong><br />
+                        Das Projekt kann ausschließlich über die Whitelist betreten werden.
+                      </div>
+                      <div style={{ marginBottom: '10px' }}>
+                        <strong>❤️ Leben-System</strong><br />
+                        Jeder Spieler startet mit 3 Leben.<br />
+                        Verliert ein Spieler sein drittes Leben, scheidet er aus dem aktiven Spiel aus und ist nur noch Zuschauer.
+                      </div>
+                      <div style={{ marginBottom: '10px' }}>
+                        <strong>⚔️ PvP-Regelung</strong><br />
+                        Das absichtliche Töten von Mitspielern ohne triftigen Grund ist nicht erlaubt.<br />
+                        (Regelverstöße können zu Strafen oder Ausschluss führen.)
+                      </div>
+                      <div>
+                        <strong>🎥 Streaming-Hinweis</strong><br />
+                        Wenn du das Event streamst, melde dich bitte im Discord, damit dein Stream auf der Projektseite angezeigt werden kann.
+                      </div>
+                    </Text>
+                  </Card>
                   <Card className="sd-card" p="xl">
                     <Group mb="md"><ThemeIcon color="blue" variant="light" size="lg"><IconUsers size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Highlights</Text></Group>
                     <Text size="xs" className="standard-font" c="#c9d1d9">Custom Scripts, faires Team und eine wachsende Welt erwarten dich.</Text>
@@ -1053,19 +1081,20 @@ function App() {
                 <Paper className="sd-footer-box" p={40}>
                   <Stack align="center" gap="md">
                     <Title className="mc-font" order={2} style={{ fontSize: '18px', textShadow: '2px 2px #000', textAlign: 'center' }}>Bereit für Second Dimension?</Title>
-                    <Group mt="lg">
+                    <Group mt="lg" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
                       <Button size="lg" className="mc-nav-btn mc-font mc-nav-btn-discord" component="a" href="https://discord.gg/PaPe5WA3kz" target="_blank">DISCORD</Button>
                       <Button 
-  size="lg" 
-  className="mc-nav-btn mc-font mc-nav-btn-server"
-  leftSection={<IconCar size={18}/>}
-  onClick={() => {
-    navigator.clipboard.writeText('mc.sd-rp.de');
-    setJoinModalOpened(true);
-  }}
->
-  JOIN SERVER
-</Button>
+                        size="lg" 
+                        className="mc-nav-btn mc-font mc-nav-btn-server"
+                        leftSection={<IconCar size={18}/>}
+                        onClick={() => {
+                          copyToClipboard('mc.sd-rp.de').then(() => {
+                            setJoinModalOpened(true);
+                          });
+                        }}
+                      >
+                        JOIN SERVER
+                      </Button>
                     </Group>
                   </Stack>
                 </Paper>
