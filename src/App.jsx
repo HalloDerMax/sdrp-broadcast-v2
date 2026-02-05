@@ -133,16 +133,21 @@ function LeaderboardPage() {
 const rankedPlayers = [...players]
   .map(player => ({
     ...player,
-    playTimeMinutes: parsePlaytimeToMinutes(player.playTime) // ← Neu berechnen!
+    playTimeMinutes: parsePlaytimeToMinutes(player.playTime)
   }))
   .sort((a, b) => {
-    console.log(`Vergleich: ${a.username} (${a.playTimeMinutes} min, ${a.lives} ❤️) vs ${b.username} (${b.playTimeMinutes} min, ${b.lives} ❤️)`);
+    // Berechne Spielzeit in Minuten DIREKT beim Vergleich
+    const aMinutes = a.playTimeMinutes || parsePlaytimeToMinutes(a.playTime);
+    const bMinutes = b.playTimeMinutes || parsePlaytimeToMinutes(b.playTime);
     
-    // Sortiere zuerst nach Spielzeit (absteigend)
-    if (b.playTimeMinutes !== a.playTimeMinutes) {
-      return b.playTimeMinutes - a.playTimeMinutes;
+    console.log(`Vergleich: ${a.username} (${aMinutes} min, ${a.lives} ❤️) vs ${b.username} (${bMinutes} min, ${b.lives} ❤️)`);
+    
+    // Sortiere nach Spielzeit (absteigend - längste Zeit zuerst)
+    if (bMinutes !== aMinutes) {
+      return bMinutes - aMinutes;
     }
-    // Bei gleicher Spielzeit nach Leben sortieren (absteigend)
+    
+    // Bei gleicher Spielzeit: Sortiere nach Leben (absteigend)
     return b.lives - a.lives;
   });
 
