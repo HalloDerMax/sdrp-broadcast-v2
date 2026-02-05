@@ -29,10 +29,8 @@ const theme = createTheme({
 // ============================================
 const copyToClipboard = (text) => {
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    // Modern Clipboard API (nur HTTPS)
     return navigator.clipboard.writeText(text);
   } else {
-    // Fallback für HTTP
     const textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.style.position = "fixed";
@@ -827,11 +825,23 @@ function App() {
           box-shadow: inset -4px -4px #1b5e20, inset 4px 4px #66bb6a !important;
         }
 
-        .mc-nav-btn-discord { background: #5865F2; box-shadow: inset -4px -4px #3d46a8, inset 4px 4px #8a94ff !important; }
+        .mc-nav-btn-discord { 
+          background: #5865F2; 
+          box-shadow: inset -4px -4px #3d46a8, inset 4px 4px #8a94ff !important; 
+        }
         
-        .mc-nav-btn-server { background: #22c55e; box-shadow: inset -4px -4px #16a34a, inset 4px 4px #4ade80 !important; }
+        .mc-nav-btn-server { 
+          background: #22c55e; 
+          box-shadow: inset -4px -4px #16a34a, inset 4px 4px #4ade80 !important; 
+        }
         
-        .timer-block { background: rgba(0,0,0,0.8); border: 3px solid #555; box-shadow: inset -2px -2px #222, inset 2px 2px #888; padding: 8px 12px; min-width: 220px; }
+        .timer-block { 
+          background: rgba(0,0,0,0.8); 
+          border: 3px solid #555; 
+          box-shadow: inset -2px -2px #222, inset 2px 2px #888; 
+          padding: 8px 12px; 
+          min-width: 220px; 
+        }
         
         .mc-panel { 
           background: rgba(49, 49, 49, 0.9); 
@@ -847,33 +857,68 @@ function App() {
 
         .pixel-border { border: 2px solid #000; image-rendering: pixelated; }
         .sd-card { background: rgba(22, 27, 34, 0.9); border: 1px solid #30363d; border-radius: 8px; }
-        .sd-footer-box { background: linear-gradient(180deg, rgba(61, 43, 43, 0.9) 0%, rgba(43, 26, 26, 0.9) 100%); border: 1px solid #6e3636; border-radius: 10px; }
+        .sd-footer-box { 
+          background: linear-gradient(180deg, rgba(61, 43, 43, 0.9) 0%, rgba(43, 26, 26, 0.9) 100%); 
+          border: 1px solid #6e3636; 
+          border-radius: 10px; 
+        }
 
-        /* MOBILE RESPONSIVE */
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
+          .mc-nav-btn {
+            font-size: 8px !important;
+            height: 45px !important;
+            padding: 0 12px !important;
+          }
+          .mc-nav-btn svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
+        }
+
+        @media (max-width: 992px) {
           .mc-nav-btn {
             font-size: 7px !important;
             height: 40px !important;
-            padding: 0 8px !important;
+            padding: 0 10px !important;
           }
           .mc-nav-btn svg {
             width: 14px !important;
             height: 14px !important;
           }
           .timer-block {
-            min-width: 180px;
+            min-width: 160px;
+            padding: 6px 10px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .mc-nav-btn {
+            font-size: 6px !important;
+            height: 35px !important;
+            padding: 0 8px !important;
+          }
+          .mc-nav-btn svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .timer-block {
+            display: none;
           }
           .mantine-AppShell-header {
             height: auto !important;
-            padding: 10px 0 !important;
+            padding: 8px 0 !important;
           }
         }
 
         @media (max-width: 480px) {
           .mc-nav-btn {
-            font-size: 6px !important;
-            height: 35px !important;
+            font-size: 5px !important;
+            height: 32px !important;
             padding: 0 6px !important;
+          }
+          .mc-nav-btn svg {
+            width: 10px !important;
+            height: 10px !important;
           }
         }
       `}} />
@@ -883,7 +928,7 @@ function App() {
           <Container size="xl" h="100%" py="xs">
             <Stack gap="md" h="100%" justify="center">
               <Group justify="space-between" wrap="nowrap" align="center">
-                <Title order={3} className="mc-font" style={{ fontSize: '14px', color: '#48bb78', textShadow: '2px 2px #000' }}>
+                <Title order={3} className="mc-font" style={{ fontSize: '14px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
                   Second Dimension<br/>
                   <Text span c="white" inherit style={{ fontSize: '10px' }}>MINECRAFT HARDCORE</Text>
                 </Title>
@@ -943,7 +988,6 @@ function App() {
             <PlayersPage />
           ) : (
             <Container size="xl">
-              {/* REST OF HOME PAGE CONTENT - CONTINUING... */}
               <Box mb={30} mt={10}>
                 <Group mb="xs">
                   <IconSkull size={18} color="red" />
@@ -999,7 +1043,10 @@ function App() {
                     <Group justify="space-between" style={{ flexWrap: 'wrap' }}>
                       <Group>
                         <Avatar src={`https://minotar.net/avatar/${selectedStream.user_name}/48`} radius={0} className="pixel-border" />
-                        <Stack gap={0}><Text fw={900} className="mc-font" size="sm" c="green">{selectedStream.user_name}</Text><Text size="xs" c="dimmed" style={{fontFamily: 'Inter'}}>{selectedStream.title}</Text></Stack>
+                        <Stack gap={0}>
+                          <Text fw={900} className="mc-font" size="sm" c="green">{selectedStream.user_name}</Text>
+                          <Text size="xs" c="dimmed" style={{fontFamily: 'Inter'}}>{selectedStream.title}</Text>
+                        </Stack>
                       </Group>
                       <Badge color="red" size="lg" radius={0} className="mc-font">LIVE_NOW</Badge>
                     </Group>
@@ -1047,7 +1094,10 @@ function App() {
                 </Group>
                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg" mb="lg">
                   <Card className="sd-card" p="xl">
-                    <Group mb="md"><ThemeIcon color="orange" variant="light" size="lg"><IconBroadcast size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Infos</Text></Group>
+                    <Group mb="md">
+                      <ThemeIcon color="orange" variant="light" size="lg"><IconBroadcast size={20}/></ThemeIcon>
+                      <Text className="mc-font" style={{fontSize: '12px'}}>Infos</Text>
+                    </Group>
                     <Text size="xs" className="standard-font" c="#8b949e" component="div">
                       <div style={{ marginBottom: '10px' }}>
                         <strong>🟩 Minecraft Hardcore Event – Regeln & Infos</strong>
@@ -1073,16 +1123,31 @@ function App() {
                     </Text>
                   </Card>
                   <Card className="sd-card" p="xl">
-                    <Group mb="md"><ThemeIcon color="blue" variant="light" size="lg"><IconUsers size={20}/></ThemeIcon><Text className="mc-font" style={{fontSize: '12px'}}>Highlights</Text></Group>
-                    <Text size="xs" className="standard-font" c="#c9d1d9">Custom Scripts, faires Team und eine wachsende Welt erwarten dich.</Text>
+                    <Group mb="md">
+                      <ThemeIcon color="blue" variant="light" size="lg"><IconUsers size={20}/></ThemeIcon>
+                      <Text className="mc-font" style={{fontSize: '12px'}}>Highlights</Text>
+                    </Group>
+                    <Text size="xs" className="standard-font" c="#c9d1d9">
+                      Custom Scripts, faires Team und eine wachsende Welt erwarten dich.
+                    </Text>
                   </Card>
                 </SimpleGrid>
 
                 <Paper className="sd-footer-box" p={40}>
                   <Stack align="center" gap="md">
-                    <Title className="mc-font" order={2} style={{ fontSize: '18px', textShadow: '2px 2px #000', textAlign: 'center' }}>Bereit für Second Dimension?</Title>
+                    <Title className="mc-font" order={2} style={{ fontSize: '18px', textShadow: '2px 2px #000', textAlign: 'center' }}>
+                      Bereit für Second Dimension?
+                    </Title>
                     <Group mt="lg" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-                      <Button size="lg" className="mc-nav-btn mc-font mc-nav-btn-discord" component="a" href="https://discord.gg/PaPe5WA3kz" target="_blank">DISCORD</Button>
+                      <Button 
+                        size="lg" 
+                        className="mc-nav-btn mc-font mc-nav-btn-discord" 
+                        component="a" 
+                        href="https://discord.gg/PaPe5WA3kz" 
+                        target="_blank"
+                      >
+                        DISCORD
+                      </Button>
                       <Button 
                         size="lg" 
                         className="mc-nav-btn mc-font mc-nav-btn-server"
