@@ -128,13 +128,21 @@ function LeaderboardPage() {
     }
   };
 
-  // Calculate ranking score: PlayTimeMinutes * 10 + Lives
+  // Calculate ranking: Only alive players, sorted by PlayTime (desc) then Lives (desc)
   const rankedPlayers = [...players]
+    .filter(player => player.lives > 0) // Nur lebende Spieler
     .map(player => ({
       ...player,
-      score: (player.playTimeMinutes * 10) + player.lives
+      score: (player.playTimeMinutes * 100) + player.lives
     }))
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => {
+      // Sortiere zuerst nach Spielzeit (absteigend)
+      if (b.playTimeMinutes !== a.playTimeMinutes) {
+        return b.playTimeMinutes - a.playTimeMinutes;
+      }
+      // Bei gleicher Spielzeit nach Leben sortieren
+      return b.lives - a.lives;
+    });
 
   const getMedalIcon = (rank) => {
     if (rank === 1) return <IconCrown size={32} color="#ffd700" fill="#ffd700" />;
@@ -487,7 +495,7 @@ function LeaderboardPage() {
           </Text>
         </Group>
         <Text className="standard-font" size="xs" c="dimmed" mb="md">
-          Bewertung: Spielzeit (Minuten) × 10 + Leben
+          Bewertung: Nur lebende Spieler • Sortiert nach Spielzeit (Minuten) → dann Leben
         </Text>
       </Paper>
 
@@ -1578,6 +1586,14 @@ function App() {
               {/* DESKTOP NAVIGATION */}
               <Group className="desktop-nav" gap="sm">
                 <Button 
+                  className={`mc-nav-btn mc-font ${currentPage === 'leaderboard' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('leaderboard')}
+                  style={{ fontSize: '12px', height: '45px', padding: '0 12px', minWidth: '45px' }}
+                  title="Bestenliste"
+                >
+                  <IconSkull size={20}/>
+                </Button>
+                <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
                   leftSection={<IconBroadcast size={16}/>}
                   onClick={() => setCurrentPage('home')}
@@ -1592,14 +1608,6 @@ function App() {
                   style={{ fontSize: '12px', height: '45px', padding: '0 16px' }}
                 >
                   DASHBOARD
-                </Button>
-                <Button 
-                  className={`mc-nav-btn mc-font ${currentPage === 'leaderboard' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('leaderboard')}
-                  style={{ fontSize: '12px', height: '45px', padding: '0 12px', minWidth: '45px' }}
-                  title="Bestenliste"
-                >
-                  <IconSkull size={20}/>
                 </Button>
                 <Button 
                   className="mc-nav-btn mc-font mc-nav-btn-server"
