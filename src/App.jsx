@@ -18,7 +18,7 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
 const API_BASE = 'https://sdrp-broadcast.onrender.com';
-const PROJECT_START = new Date('2026-02-07T15:00:00');
+const PROJECT_START = new Date('2026-02-07T1:00:00');
 
 const theme = createTheme({
   primaryColor: 'green',
@@ -323,28 +323,29 @@ function PlayersPage() {
               opacity: player.lives === 0 ? 0.6 : 1
             }}
           >
-            {player.status === 'online' && player.lives > 0 && (
-              <Badge 
-                color="green" 
-                size="xs"
-                radius={0}
-                className="mc-font"
-                style={{ position: 'absolute', top: 10, right: 10, fontSize: '6px' }}
-              >
-                ONLINE
-              </Badge>
-            )}
-            {player.status === 'eliminated' && (
-              <Badge 
-                color="red" 
-                size="xs"
-                radius={0}
-                className="mc-font"
-                style={{ position: 'absolute', top: 10, right: 10, fontSize: '6px' }}
-              >
-                ☠ OUT
-              </Badge>
-            )}
+            {/* Status Badge - Online/Offline/Eliminated */}
+{player.lives > 0 && (
+  <Badge 
+    color={player.status === 'online' ? "green" : "red"}
+    size="xs"
+    radius={0}
+    className="mc-font"
+    style={{ position: 'absolute', top: 10, right: 10, fontSize: '6px' }}
+  >
+    {player.status === 'online' ? 'ONLINE' : 'OFFLINE'}
+  </Badge>
+)}
+{player.status === 'eliminated' && (
+  <Badge 
+    color="red" 
+    size="xs"
+    radius={0}
+    className="mc-font"
+    style={{ position: 'absolute', top: 10, right: 10, fontSize: '6px' }}
+  >
+    ☠ OUT
+  </Badge>
+)}
 
             <Stack gap="md" align="center">
               <Avatar
