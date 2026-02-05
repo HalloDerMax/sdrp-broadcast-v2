@@ -129,11 +129,10 @@ function LeaderboardPage() {
   };
 
   // Calculate ranking: Only alive players, sorted by PlayTime (desc) then Lives (desc)
-  const rankedPlayers = [...players]
-    .filter(player => player.lives > 0) // Nur lebende Spieler
+ const rankedPlayers = [...players]
     .map(player => ({
       ...player,
-      score: (player.playTimeMinutes * 100) + player.lives
+      score: (player.playTimeMinutes * 10) + player.lives
     }))
     .sort((a, b) => {
       // Sortiere zuerst nach Spielzeit (absteigend)
@@ -495,7 +494,7 @@ function LeaderboardPage() {
           </Text>
         </Group>
         <Text className="standard-font" size="xs" c="dimmed" mb="md">
-          Bewertung: Nur lebende Spieler • Sortiert nach Spielzeit (Minuten) → dann Leben
+          Bewertung: Alle Spieler Sortiert nach Spielzeit → dann Leben
         </Text>
       </Paper>
 
