@@ -613,13 +613,12 @@ function LeaderboardPage() {
                     </Text>
                     <Text 
                       className="mc-font" 
-                      size="lg"
-                      c={isTopThree ? (rank === 1 ? 'yellow' : rank === 2 ? 'gray' : 'orange') : 'white'}
+                      style={{
+                        fontSize: '10px',
+                        color: isTopThree ? (rank === 1 ? '#ffd700' : rank === 2 ? '#c0c0c0' : '#cd7f32') : 'white'
+                      }}
                     >
-                      {player.playTimeMinutes}
-                    </Text>
-                    <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '6px'}}>
-                      MINUTEN
+                      {player.playTime}
                     </Text>
                   </Stack>
                 </Paper>
