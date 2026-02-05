@@ -840,7 +840,7 @@ function App() {
           border: 3px solid #555; 
           box-shadow: inset -2px -2px #222, inset 2px 2px #888; 
           padding: 8px 12px; 
-          min-width: 220px; 
+          min-width: 180px;
         }
         
         .mc-panel { 
@@ -863,11 +863,20 @@ function App() {
           border-radius: 10px; 
         }
 
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1400px) {
+          .mc-nav-btn {
+            font-size: 9px !important;
+            height: 48px !important;
+            padding: 0 16px !important;
+          }
+        }
+
         @media (max-width: 1200px) {
           .mc-nav-btn {
             font-size: 8px !important;
             height: 45px !important;
-            padding: 0 12px !important;
+            padding: 0 14px !important;
           }
           .mc-nav-btn svg {
             width: 16px !important;
@@ -878,15 +887,15 @@ function App() {
         @media (max-width: 992px) {
           .mc-nav-btn {
             font-size: 7px !important;
-            height: 40px !important;
-            padding: 0 10px !important;
+            height: 42px !important;
+            padding: 0 12px !important;
           }
           .mc-nav-btn svg {
-            width: 14px !important;
-            height: 14px !important;
+            width: 15px !important;
+            height: 15px !important;
           }
           .timer-block {
-            min-width: 160px;
+            min-width: 150px;
             padding: 6px 10px;
           }
         }
@@ -894,56 +903,56 @@ function App() {
         @media (max-width: 768px) {
           .mc-nav-btn {
             font-size: 6px !important;
-            height: 35px !important;
-            padding: 0 8px !important;
+            height: 38px !important;
+            padding: 0 10px !important;
           }
           .mc-nav-btn svg {
-            width: 12px !important;
-            height: 12px !important;
+            width: 13px !important;
+            height: 13px !important;
           }
           .timer-block {
             display: none;
           }
           .mantine-AppShell-header {
             height: auto !important;
-            padding: 8px 0 !important;
+            padding: 10px 0 !important;
           }
         }
 
         @media (max-width: 480px) {
           .mc-nav-btn {
             font-size: 5px !important;
-            height: 32px !important;
-            padding: 0 6px !important;
+            height: 34px !important;
+            padding: 0 8px !important;
           }
           .mc-nav-btn svg {
-            width: 10px !important;
-            height: 10px !important;
+            width: 11px !important;
+            height: 11px !important;
           }
         }
       `}} />
 
-      <AppShell header={{ height: 100 }} padding="md">
+      <AppShell header={{ height: 140 }} padding="md">
         <AppShell.Header withBorder={false}>
-          <Container size="xl" h="100%" py="xs">
-            <Stack gap="md" h="100%" justify="center">
+          <Container size="xl" py="md">
+            <Stack gap="lg">
               <Group justify="space-between" wrap="nowrap" align="center">
-                <Title order={3} className="mc-font" style={{ fontSize: '14px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
+                <Title order={3} className="mc-font" style={{ fontSize: '12px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.4 }}>
                   Second Dimension<br/>
-                  <Text span c="white" inherit style={{ fontSize: '10px' }}>MINECRAFT HARDCORE</Text>
+                  <Text span c="white" inherit style={{ fontSize: '9px' }}>MINECRAFT HARDCORE</Text>
                 </Title>
                 <Box className="timer-block">
                    <Group gap="xs" wrap="nowrap">
-                      <IconClock size={16} color="#f1e05a" />
+                      <IconClock size={14} color="#f1e05a" />
                       <Stack gap={0}>
-                        <Text className="mc-font" style={{ fontSize: '7px' }} c="dimmed">{timeLabel}</Text>
-                        <Text className="mc-font" style={{ fontSize: '10px', color: '#f1e05a' }}>{timeValue}</Text>
+                        <Text className="mc-font" style={{ fontSize: '6px' }} c="dimmed">{timeLabel}</Text>
+                        <Text className="mc-font" style={{ fontSize: '9px', color: '#f1e05a' }}>{timeValue}</Text>
                       </Stack>
                    </Group>
                 </Box>
               </Group>
 
-              <Group gap="xs" justify="center" style={{ flexWrap: 'wrap' }}>
+              <Group gap="sm" justify="center" style={{ flexWrap: 'wrap' }}>
                 <Button 
                   className={`mc-nav-btn mc-font ${currentPage === 'home' ? 'active' : ''}`}
                   leftSection={<IconBroadcast size={18}/>}
