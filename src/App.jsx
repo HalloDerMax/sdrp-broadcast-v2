@@ -18,7 +18,7 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
 const API_BASE = 'https://sdrp-broadcast.onrender.com';
-const PROJECT_START = new Date('2026-02-07T1:00:00');
+const PROJECT_START = new Date('2026-02-07T15:00:00');
 
 const theme = createTheme({
   primaryColor: 'green',
