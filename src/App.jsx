@@ -980,7 +980,7 @@ function App() {
               {/* LOGO + TIMER */}
               <Group gap="md" align="center" style={{ flex: 1 }}>
                 <Stack gap="xs">
-                  <Title order={3} className="mc-font" style={{ fontSize: '12px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
+                  <Title order={3} className="mc-font" style={{ fontSize: '14px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
                     Second Dimension<br/>
                     <Text span c="white" inherit style={{ fontSize: '9px' }}>MINECRAFT HARDCORE</Text>
                   </Title>
@@ -990,8 +990,8 @@ function App() {
                   <Group gap="xs" wrap="nowrap">
                     <IconClock size={12} color="#f1e05a" />
                     <Stack gap={0}>
-                      <Text className="mc-font" style={{ fontSize: '6px' }} c="dimmed">{timeLabel}</Text>
-                      <Text className="mc-font" style={{ fontSize: '8px', color: '#f1e05a' }}>{timeValue}</Text>
+                      <Text className="mc-font" style={{ fontSize: '8px' }} c="dimmed">{timeLabel}</Text>
+                      <Text className="mc-font" style={{ fontSize: '12px', color: '#f1e05a' }}>{timeValue}</Text>
                     </Stack>
                   </Group>
                 </Box>
