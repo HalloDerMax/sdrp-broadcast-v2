@@ -963,7 +963,17 @@ function App() {
         }
       `}} />
 
-      <AppShell header={{ height: { base: 80, md: 100 } }} padding="md">
+      <AppShell 
+        header={{ height: { base: 80, md: 100 } }} 
+        padding="md"
+        styles={{
+          main: {
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+          }
+        }}
+      >
         <AppShell.Header withBorder={false}>
           <Container size="xl" h="100%">
             <Group h="100%" justify="space-between" wrap="nowrap" align="center">
@@ -1041,11 +1051,11 @@ function App() {
           </Container>
         </AppShell.Header>
 
-        <AppShell.Main>
+        <AppShell.Main style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           {currentPage === 'dashboard' ? (
             <PlayersPage />
           ) : (
-            <Container size="xl">
+            <Container size="xl" style={{ flex: 1 }}>
               <Box mb={30} mt={10}>
                 <Group mb="xs">
                   <IconSkull size={18} color="red" />
@@ -1224,131 +1234,120 @@ function App() {
               </Box>
             </Container>
           )}
+          
           {/* FOOTER */}
-<Box 
-  component="footer" 
-  style={{ 
-    marginTop: '100px',
-    borderTop: '4px solid #000',
-    background: 'rgba(34, 34, 34, 0.95)',
-    padding: '40px 0 20px 0'
-  }}
->
-  <Container size="xl">
-    <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl" mb="xl">
-      {/* PROJEKT */}
-      <Stack gap="sm">
-        <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
-          PROJEKT
-        </Text>
-        <Stack gap="xs">
-          <Text className="standard-font" size="sm" c="dimmed">
-            Second Dimension
-          </Text>
-          <Text className="standard-font" size="xs" c="dimmed">
-            Minecraft Hardcore Event
-          </Text>
-        </Stack>
-      </Stack>
-
-      {/* LINKS */}
-      <Stack gap="sm">
-        <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
-          LINKS
-        </Text>
-        <Stack gap="xs">
-          <Text 
-            component="a" 
-            href="https://discord.gg/PaPe5WA3kz" 
-            target="_blank"
-            className="standard-font" 
-            size="sm" 
-            c="dimmed"
-            style={{ textDecoration: 'none', cursor: 'pointer' }}
-            onMouseEnter={(e) => e.target.style.color = '#48bb78'}
-            onMouseLeave={(e) => e.target.style.color = ''}
+          <Box 
+            component="footer" 
+            style={{ 
+              marginTop: 'auto',
+              borderTop: '4px solid #000',
+              background: 'rgba(34, 34, 34, 0.95)',
+              padding: '40px 0 20px 0'
+            }}
           >
-            Discord Server
-          </Text>
-          <Text 
-            component="a" 
-            href="https://twitch.tv" 
-            target="_blank"
-            className="standard-font" 
-            size="sm" 
-            c="dimmed"
-            style={{ textDecoration: 'none', cursor: 'pointer' }}
-            onMouseEnter={(e) => e.target.style.color = '#48bb78'}
-            onMouseLeave={(e) => e.target.style.color = ''}
-          >
-            Twitch
-          </Text>
-        </Stack>
-      </Stack>
+            <Container size="xl">
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl" mb="xl">
+                {/* PROJEKT */}
+                <Stack gap="sm">
+                  <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
+                    PROJEKT
+                  </Text>
+                  <Stack gap="xs">
+                    <Text className="standard-font" size="sm" c="dimmed">
+                      Second Dimension
+                    </Text>
+                    <Text className="standard-font" size="xs" c="dimmed">
+                      Minecraft Hardcore Event
+                    </Text>
+                  </Stack>
+                </Stack>
 
-      {/* SERVER */}
-      <Stack gap="sm">
-        <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
-          SERVER
-        </Text>
-        <Stack gap="xs">
-          <Text className="standard-font" size="sm" c="dimmed">
-            IP: mc.sd-rp.de
-          </Text>
-          <Text className="standard-font" size="xs" c="dimmed">
-            Version: 1.21+
-          </Text>
-        </Stack>
-      </Stack>
+                {/* LINKS */}
+                <Stack gap="sm">
+                  <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
+                    LINKS
+                  </Text>
+                  <Stack gap="xs">
+                    <Text 
+                      component="a" 
+                      href="https://discord.gg/PaPe5WA3kz" 
+                      target="_blank"
+                      className="standard-font" 
+                      size="sm" 
+                      c="dimmed"
+                      style={{ textDecoration: 'none', cursor: 'pointer' }}
+                      onMouseEnter={(e) => e.target.style.color = '#48bb78'}
+                      onMouseLeave={(e) => e.target.style.color = ''}
+                    >
+                      Discord Server
+                    </Text>
+                    <Text 
+                      component="a" 
+                      href="https://twitch.tv" 
+                      target="_blank"
+                      className="standard-font" 
+                      size="sm" 
+                      c="dimmed"
+                      style={{ textDecoration: 'none', cursor: 'pointer' }}
+                      onMouseEnter={(e) => e.target.style.color = '#48bb78'}
+                      onMouseLeave={(e) => e.target.style.color = ''}
+                    >
+                      Twitch
+                    </Text>
+                  </Stack>
+                </Stack>
 
-      {/* RECHTLICHES */}
-      <Stack gap="sm">
-        <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
-          RECHTLICHES
-        </Text>
-        <Stack gap="xs">
-          <Text 
-            component="a" 
-            href="https://second-dimension.de/impressum/" 
-            target="_blank"
-            className="standard-font" 
-            size="sm" 
-            c="dimmed"
-            style={{ textDecoration: 'none', cursor: 'pointer' }}
-            onMouseEnter={(e) => e.target.style.color = '#48bb78'}
-            onMouseLeave={(e) => e.target.style.color = ''}
-          >
-            Impressum
-          </Text>
-          <Text 
-            component="a" 
-            href="https://second-dimension.de/datenschutz/" 
-            target="_blank"
-            className="standard-font" 
-            size="sm" 
-            c="dimmed"
-            style={{ textDecoration: 'none', cursor: 'pointer' }}
-            onMouseEnter={(e) => e.target.style.color = '#48bb78'}
-            onMouseLeave={(e) => e.target.style.color = ''}
-          >
-            Datenschutzerklärung
-          </Text>
-        </Stack>
-      </Stack>
-    </SimpleGrid>
+                {/* SERVER */}
+                <Stack gap="sm">
+                  <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
+                    SERVER
+                  </Text>
+                  <Stack gap="xs">
+                    <Text className="standard-font" size="sm" c="dimmed">
+                      IP: mc.sd-rp.de
+                    </Text>
+                    <Text className="standard-font" size="xs" c="dimmed">
+                      Version: 1.21+
+                    </Text>
+                  </Stack>
+                </Stack>
 
-    <Divider my="xl" />
+                {/* RECHTLICHES */}
+                <Stack gap="sm">
+                  <Text className="mc-font" style={{ fontSize: '10px', color: '#48bb78' }}>
+                    RECHTLICHES
+                  </Text>
+                  <Stack gap="xs">
+                    <Text 
+                      component="a" 
+                      href="https://second-dimension.de/impressum/" 
+                      target="_blank"
+                      className="standard-font" 
+                      size="sm" 
+                      c="dimmed"
+                      style={{ textDecoration: 'none', cursor: 'pointer' }}
+                      onMouseEnter={(e) => e.target.style.color = '#48bb78'}
+                      onMouseLeave={(e) => e.target.style.color = ''}
+                    >
+                      Impressum
+                    </Text>
+                  </Stack>
+                </Stack>
+              </SimpleGrid>
 
-    <Group justify="space-between" align="center" style={{ flexWrap: 'wrap' }}>
-      <Text className="standard-font" size="xs" c="dimmed">
-        © {new Date().getFullYear()} Second Dimension. Alle Rechte vorbehalten.
-      </Text>
-      <Text className="standard-font" size="xs" c="dimmed">
-        Minecraft ist eine Marke von Mojang AB.
-      </Text>
-    </Group>
-  </Container>
-</Box>
+              <Divider my="xl" />
+
+              <Group justify="space-between" align="center" style={{ flexWrap: 'wrap' }}>
+                <Text className="standard-font" size="xs" c="dimmed">
+                  © {new Date().getFullYear()} Second Dimension. Alle Rechte vorbehalten.
+                </Text>
+                <Text className="standard-font" size="xs" c="dimmed">
+                  Minecraft ist eine Marke von Mojang AB.
+                </Text>
+              </Group>
+            </Container>
+          </Box>
+          
         </AppShell.Main>
       </AppShell>
     </MantineProvider>
