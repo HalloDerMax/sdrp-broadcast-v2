@@ -973,7 +973,7 @@ function App() {
                   Second Dimension<br/>
                   <Text span c="white" inherit style={{ fontSize: '9px' }}>MINECRAFT HARDCORE</Text>
                 </Title>
-                <Box className="timer-block">
+                <Box className="timer-block" style={{ width: '150px' }}>
                   <Group gap="xs" wrap="nowrap">
                     <IconClock size={12} color="#f1e05a" />
                     <Stack gap={0}>
