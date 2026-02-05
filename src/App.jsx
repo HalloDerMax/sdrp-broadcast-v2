@@ -968,12 +968,15 @@ function App() {
           <Container size="xl" h="100%">
             <Group h="100%" justify="space-between" wrap="nowrap" align="center">
               {/* LOGO + TIMER */}
-              <Stack gap="xs" style={{ flex: 1 }}>
-                <Title order={3} className="mc-font" style={{ fontSize: '12px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
-                  Second Dimension<br/>
-                  <Text span c="white" inherit style={{ fontSize: '9px' }}>MINECRAFT HARDCORE</Text>
-                </Title>
-                <Box className="timer-block" style={{ width: '150px' }}>
+              <Group gap="md" align="center" style={{ flex: 1 }}>
+                <Stack gap="xs">
+                  <Title order={3} className="mc-font" style={{ fontSize: '12px', color: '#48bb78', textShadow: '2px 2px #000', lineHeight: 1.3 }}>
+                    Second Dimension<br/>
+                    <Text span c="white" inherit style={{ fontSize: '9px' }}>MINECRAFT HARDCORE</Text>
+                  </Title>
+                </Stack>
+                
+                <Box className="timer-block" style={{ width: '200px' }}>
                   <Group gap="xs" wrap="nowrap">
                     <IconClock size={12} color="#f1e05a" />
                     <Stack gap={0}>
@@ -982,7 +985,7 @@ function App() {
                     </Stack>
                   </Group>
                 </Box>
-              </Stack>
+              </Group>
 
               {/* DESKTOP NAVIGATION */}
               <Group className="desktop-nav" gap="sm">
