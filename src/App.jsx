@@ -1798,11 +1798,38 @@ function App() {
                   <Card className="sd-card" p="xl">
                     <Group mb="md">
                       <ThemeIcon color="blue" variant="light" size="lg"><IconUsers size={20}/></ThemeIcon>
-                      <Text className="mc-font" style={{fontSize: '12px'}}>Highlights</Text>
+                      <Text className="mc-font" style={{fontSize: '12px'}}>Update</Text>
                     </Group>
-                    <Text size="xs" className="standard-font" c="#c9d1d9">
-                      Custom Scripts, faires Team und eine wachsende Welt erwarten dich.
-                    </Text>
+                    <Text size="xs" className="standard-font" c="#8b949e" component="div">
+  <div style={{ marginBottom: '10px' }}>
+    <strong>🆙 Neue Updates & Änderungen</strong>
+  </div>
+
+  <div style={{ marginBottom: '10px' }}>
+    <strong>🏷️ [Hardcore] Name Tag</strong><br />
+    Jeder Spieler mit mindestens einem Leben trägt jetzt den [Hardcore] Tag im Spiel. 
+    Dieser verschwindet dauerhaft nach dem ersten Permadeath.
+  </div>
+
+  <div style={{ marginBottom: '10px' }}>
+    <strong>🔥 Die Hölle (Respawnsystem)</strong><br />
+    Nach einem Permadeath wirst du in eine weit entfernte Hölle verbannt (20k+ Blöcke). 
+    Dort musst du Blöcke abbauen, um am Weltspawn wiederbelebt zu werden.<br />
+    <em>Hinweis: Nach der Befreiung spielst du ohne Hardcore-Status und ohne Items normal weiter.</em>
+  </div>
+
+  <div style={{ marginBottom: '10px' }}>
+    <strong>📜 Log-Anpassungen</strong><br />
+    Tode werden in den Logs nur noch dann als "Permadeath" angekündigt, wenn der Spieler tatsächlich seinen Hardcore-Status verliert. Reguläre Tode danach erscheinen normal.
+  </div>
+
+  <div style={{ marginBottom: '10px' }}>
+    <strong>✨ Geplante Features</strong><br />
+    • Spieler-Shops<br />
+    • Erweiterte Bestenlisten & Statistiken auf der Webseite<br />
+    • Dynmap-Integration (bei Bedarf)
+  </div>
+</Text>
                   </Card>
                 </SimpleGrid>
 
