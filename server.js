@@ -532,3 +532,27 @@ router.post("/players", (req, res) => {
 
     res.json({ success: true });
 });
+app.post('/api/minecraft/players', async (req, res) => {
+    try {
+        const { server, ts, players } = req.body;
+
+        if (!players || !Array.isArray(players)) {
+            return res.status(400).json({ error: "Invalid payload" });
+        }
+
+        const data = {
+            server: server || "mc.sd-rp.de",
+            ts: ts || new Date().toISOString(),
+            players
+        };
+
+        await saveMinecraftData(data);
+
+        console.log(`Saved batch for ${players.length} players`);
+
+        res.json({ success: true, count: players.length });
+    } catch (error) {
+        console.error("Batch save error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
