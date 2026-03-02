@@ -517,18 +517,4 @@ app.listen(PORT, async () => {
     console.log('   GET  /api/twitch/streamer-data');
     console.log('   POST /api/deathbroadcast');
     console.log('   GET  /api/deathbroadcast');
-});
-router.post("/players", (req, res) => {
-    const { server, ts, players } = req.body;
 
-    if (!server || !players || !Array.isArray(players)) {
-        return res.status(400).json({ error: "Invalid payload" });
-    }
-
-    // hier speichern wir die Stats
-    global.minecraftStats = req.body;
-
-    console.log("Received stats batch:", players.length, "players");
-
-    res.json({ success: true });
-});
