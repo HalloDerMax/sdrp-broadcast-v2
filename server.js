@@ -461,20 +461,7 @@ app.delete('/api/minecraft/players', async (req, res) => {
     await saveMinecraftData();
     res.json({ success: true, deletedCount: count });
 });
-router.post("/players", (req, res) => {
-    const { server, ts, players } = req.body;
 
-    if (!server || !players || !Array.isArray(players)) {
-        return res.status(400).json({ error: "Invalid payload" });
-    }
-
-    // hier speichern wir die Stats
-    global.minecraftStats = req.body;
-
-    console.log("Received stats batch:", players.length, "players");
-
-    res.json({ success: true });
-});
 app.post('/api/minecraft/stats', async (req, res) => {
     try {
         const { server, ts, players } = req.body;
