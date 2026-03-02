@@ -1,1662 +1,449 @@
-Du hast gesagt
-Das ist mein Projekt: // Production-Ready Server mit ALLEN Features
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+  MantineProvider, AppShell, Container, Title, Group, Badge, Card, SimpleGrid, 
+  Text, Button, Stack, Avatar, Image, Modal, ActionIcon, Paper, Box, 
+  createTheme, ScrollArea, TextInput, PasswordInput, ThemeIcon, Divider, Progress, Select,
+  Burger, Drawer, RingProgress, Center
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { 
+  IconBrandDiscord, IconUsers, IconBroadcast, IconCircleFilled, IconCar, IconAlertTriangle, 
+  IconPaw, IconClock, IconSkull, IconHeart, IconHeartBroken, IconSearch, IconFilter, 
+  IconSword, IconShield, IconTrophy, IconMenu2, IconMedal, IconCrown, IconFlame
+} from '@tabler/icons-react';
+import axios from 'axios';
+import { notifications, Notifications } from '@mantine/notifications';
 
-import express from 'express';
+import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
 
-import fetch from 'node-fetch';
+const API_BASE = 'https://sdrp-broadcast.onrender.com';
+const PROJECT_START = new Date('2026-02-07T18:00:00');
 
-import cors from 'cors';
+const theme = createTheme({
+  primaryColor: 'green',
+  fontFamily: '"Press Start 2P", cursive',
+  defaultRadius: 0,
+});
 
-import dotenv from 'dotenv';
+// ============================================
+// CLIPBOARD HELPER FUNCTION (HTTPS + HTTP)
+// ============================================
+const copyToClipboard = (text) => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+    document.body.removeChild(textArea);
+    return Promise.resolve();
+  }
+};
 
-import fs from 'fs';
+// ============================================
+// HELPER FUNCTION: Parse Playtime to Minutes
+// ============================================
+const parsePlaytimeToMinutes = (playtime) => {
+  if (!playtime) return 0;
+  
+  // Format: "Xh Ym" or "Xh" or "Ym"
+  let totalMinutes = 0;
+  
+  const hourMatch = playtime.match(/(\d+)h/);
+  const minMatch = playtime.match(/(\d+)m/);
+  
+  if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
+  if (minMatch) totalMinutes += parseInt(minMatch[1]);
+  
+  return totalMinutes;
+};
 
-import path from 'path';
+// ============================================
+// LEADERBOARD PAGE COMPONENT
+// ============================================
+function LeaderboardPage() {
+  const [players, setPlayers] = useState([]);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-import { fileURLToPath } from 'url';
+  useEffect(() => {
+    fetchPlayers();
+    const interval = setInterval(() => {
+      fetchPlayers();
+      setLastUpdate(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-import { dirname } from 'path';
+  const fetchPlayers = async () => {
+    try {
+      setIsRefreshing(true);
+      const response = await axios.get(`${API_BASE}/api/minecraft/players`);
+      const apiData = response.data;
+      const playersData = apiData.players || [];
+      
+      if (playersData.length === 0) {
+        console.warn('⚠️ No players found in API response');
+        setPlayers([]);
+        setIsRefreshing(false);
+        return;
+      }
+      
+      const processedPlayers = playersData.map((player) => ({
+        id: player.id,
+        username: player.username,
+        lives: player.lives,
+        kills: player.kills,
+        deaths: player.deaths,
+        playTime: player.playTime,
+        playTimeMinutes: parsePlaytimeToMinutes(player.playTime),
+        status: player.status,
+        lastDeath: player.lastDeath
+      }));
+      
+      setPlayers(processedPlayers);
+      setIsRefreshing(false);
+    } catch (error) {
+      setIsRefreshing(false);
+      console.error('❌ Error fetching players:', error);
+      setPlayers([]);
+      notifications.show({
+        title: 'API Fehler',
+        message: 'Konnte Spieler-Daten nicht laden.',
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
+  };
 
+const rankedPlayers = [...players]
+  .map(player => ({
+    ...player,
+    playTimeMinutes: parsePlaytimeToMinutes(player.playTime)
+  }))
+  .sort((a, b) => {
+    const aMinutes = a.playTimeMinutes || parsePlaytimeToMinutes(a.playTime);
+    const bMinutes = b.playTimeMinutes || parsePlaytimeToMinutes(b.playTime);
+    
+    if (bMinutes !== aMinutes) {
+      return bMinutes - aMinutes;
+    }
+    return b.lives - a.lives;
+  });
 
+  const getMedalIcon = (rank) => {
+    if (rank === 1) return <IconCrown size={32} color="#ffd700" fill="#ffd700" />;
+    if (rank === 2) return <IconMedal size={32} color="#c0c0c0" fill="#c0c0c0" />;
+    if (rank === 3) return <IconMedal size={32} color="#cd7f32" fill="#cd7f32" />;
+    return <IconTrophy size={32} color="#71717a" />;
+  };
 
-const __filename = fileURLToPath(import.meta.url);
+  const getRankColor = (rank) => {
+    if (rank === 1) return '#ffd700';
+    if (rank === 2) return '#c0c0c0';
+    if (rank === 3) return '#cd7f32';
+    return '#71717a';
+  };
 
-const __dirname = dirname(__filename);
+  const getRankBadgeColor = (rank) => {
+    if (rank === 1) return 'yellow';
+    if (rank === 2) return 'gray';
+    if (rank === 3) return 'orange';
+    return 'dark';
+  };
 
+  const stats = {
+    topPlayer: rankedPlayers[0]?.username || 'N/A',
+    mostKills: [...players].sort((a, b) => b.kills - a.kills)[0],
+    mostPlaytime: [...players].sort((a, b) => b.playTimeMinutes - a.playTimeMinutes)[0],
+    avgLives: players.length > 0 ? (players.reduce((sum, p) => sum + p.lives, 0) / players.length).toFixed(1) : 0,
+  };
 
+  return (
+    <Container size="xl" py="xl">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes shine {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .leaderboard-card-hover {
+          transition: all 0.3s ease;
+        }
+        .leaderboard-card-hover:hover {
+          transform: translateX(8px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .gold-shine {
+          background: linear-gradient(90deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+          background-size: 200% auto;
+          animation: shine 3s linear infinite;
+        }
+        .rank-1 {
+          border-color: #ffd700 !important;
+          box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), inset -4px -4px #1a1a1a, inset 4px 4px #555 !important;
+        }
+        .rank-2 {
+          border-color: #c0c0c0 !important;
+          box-shadow: 0 0 20px rgba(192, 192, 192, 0.5), inset -4px -4px #1a1a1a, inset 4px 4px #555 !important;
+        }
+        .rank-3 {
+          border-color: #cd7f32 !important;
+          box-shadow: 0 0 20px rgba(205, 127, 50, 0.5), inset -4px -4px #1a1a1a, inset 4px 4px #555 !important;
+        }
+      `}} />
 
-dotenv.config();
+      <Group mb="xl" justify="space-between">
+        <Group>
+          <IconTrophy size={32} color="#ffd700" />
+          <Title className="mc-font" style={{ fontSize: '18px', textShadow: '2px 2px #000' }}>
+            BESTENLISTE
+          </Title>
+        </Group>
+        <Paper className="mc-panel" p="xs" px="md">
+          <Group gap="xs">
+            <IconClock 
+              size={14} 
+              color={isRefreshing ? "#eab308" : "#48bb78"} 
+              style={{ 
+                animation: isRefreshing ? 'spin 1s linear infinite' : 'none' 
+              }}
+            />
+            <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>
+              {isRefreshing ? 'LÄDT...' : `UPDATE: ${lastUpdate.toLocaleTimeString('de-DE')}`}
+            </Text>
+          </Group>
+        </Paper>
+      </Group>
 
+      {/* TOP STATS */}
+      <SimpleGrid cols={{ base: 2, sm: 2, md: 4 }} spacing="md" mb="xl">
+        <Paper className="mc-panel rank-1" p="md">
+          <Stack gap={5} align="center">
+            <IconCrown size={20} color="#ffd700" fill="#ffd700" />
+            <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>TOP SPIELER</Text>
+            <Text className="mc-font" size="sm" c="yellow" ta="center" style={{fontSize: '8px'}}>
+              {stats.topPlayer}
+            </Text>
+          </Stack>
+        </Paper>
 
+        <Paper className="mc-panel" p="md" style={{border: '4px solid #ef4444'}}>
+          <Stack gap={5} align="center">
+            <IconSword size={20} color="#ef4444" />
+            <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>MEISTE KILLS</Text>
+            <Text className="mc-font" size="sm" c="red" ta="center" style={{fontSize: '8px'}}>
+              {stats.mostKills?.username || 'N/A'}
+            </Text>
+            <Badge color="red" size="xs" radius={0} className="mc-font" style={{fontSize: '6px'}}>
+              {stats.mostKills?.kills || 0} KILLS
+            </Badge>
+          </Stack>
+        </Paper>
 
-const app = express();
+        <Paper className="mc-panel" p="md" style={{border: '4px solid #3b82f6'}}>
+          <Stack gap={5} align="center">
+            <IconClock size={20} color="#3b82f6" />
+            <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>LÄNGSTE ZEIT</Text>
+            <Text className="mc-font" size="sm" c="blue" ta="center" style={{fontSize: '8px'}}>
+              {stats.mostPlaytime?.username || 'N/A'}
+            </Text>
+            <Badge color="blue" size="xs" radius={0} className="mc-font" style={{fontSize: '6px'}}>
+              {stats.mostPlaytime?.playTime || '0h'}
+            </Badge>
+          </Stack>
+        </Paper>
 
-const PORT = process.env.PORT || 3000;
+        <Paper className="mc-panel" p="md" style={{border: '4px solid #22c55e'}}>
+          <Stack gap={5} align="center">
+            <IconHeart size={20} color="#22c55e" fill="#22c55e" />
+            <Text className="mc-font" size="xs" c="dimmed" style={{fontSize: '7px'}}>Ø LEBEN</Text>
+            <Text className="mc-font" size="xl" c="green">{stats.avgLives}</Text>
+          </Stack>
+        </Paper>
+      </SimpleGrid>
 
+      {/* TOP 3 PODIUM */}
+      {rankedPlayers.length >= 3 && (
+        <Box mb="xl">
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" style={{ alignItems: 'end' }}>
+            {/* 2nd Place */}
+            <Card className={`mc-panel leaderboard-card-hover rank-2`} padding="lg" style={{ order: { base: 2, sm: 1 } }}>
+              <Stack gap="md" align="center">
+                <Box style={{ animation: 'float 3s ease-in-out infinite', animationDelay: '0.5s' }}>{getMedalIcon(2)}</Box>
+                <Badge color={getRankBadgeColor(2)} size="lg" radius={0} className="mc-font" style={{ fontSize: '10px' }}>#2 PLATZ</Badge>
+                <Avatar src={`https://minotar.net/avatar/${rankedPlayers[1].username}/100`} size={100} radius={0} className="pixel-border" style={{ border: `4px solid ${getRankColor(2)}`, boxShadow: `0 0 15px ${getRankColor(2)}80` }} />
+                <Text className="mc-font" style={{ fontSize: '12px', color: getRankColor(2), textAlign: 'center', wordBreak: 'break-all' }}>{rankedPlayers[1].username}</Text>
+                <Divider style={{ width: '100%' }} />
+                <SimpleGrid cols={2} spacing="xs" style={{ width: '100%' }}>
+                  <Stack gap={2} align="center"><IconHeart size={16} color="#22c55e" fill="#22c55e" /><Text className="mc-font" size="xs" c="green">{rankedPlayers[1].lives}/3</Text></Stack>
+                  <Stack gap={2} align="center"><IconClock size={16} color="#3b82f6" /><Text className="mc-font" size="xs" c="blue">{rankedPlayers[1].playTime}</Text></Stack>
+                </SimpleGrid>
+              </Stack>
+            </Card>
 
+            {/* 1st Place */}
+            <Card className={`mc-panel leaderboard-card-hover rank-1`} padding="lg" style={{ order: { base: 1, sm: 2 } }}>
+              <Stack gap="md" align="center">
+                <Box style={{ animation: 'float 3s ease-in-out infinite' }}>{getMedalIcon(1)}</Box>
+                <Badge className="gold-shine" size="xl" radius={0} style={{ fontSize: '12px', color: '#000', border: '2px solid #000' }}>👑 CHAMPION</Badge>
+                <Avatar src={`https://minotar.net/avatar/${rankedPlayers[0].username}/120`} size={120} radius={0} className="pixel-border" style={{ border: `6px solid ${getRankColor(1)}`, boxShadow: `0 0 30px ${getRankColor(1)}`, animation: 'float 3s ease-in-out infinite' }} />
+                <Text className="mc-font" style={{ fontSize: '14px', color: getRankColor(1), textAlign: 'center', wordBreak: 'break-all', textShadow: '2px 2px #000' }}>{rankedPlayers[0].username}</Text>
+                <Divider style={{ width: '100%' }} />
+                <SimpleGrid cols={2} spacing="md" style={{ width: '100%' }}>
+                  <Stack gap={2} align="center"><IconHeart size={20} color="#22c55e" fill="#22c55e" /><Text className="mc-font" c="green" style={{fontSize: '12px'}}>{rankedPlayers[0].lives}/3</Text></Stack>
+                  <Stack gap={2} align="center"><IconClock size={20} color="#3b82f6" /><Text className="mc-font" c="blue" style={{fontSize: '12px'}}>{rankedPlayers[0].playTime}</Text></Stack>
+                </SimpleGrid>
+              </Stack>
+            </Card>
 
-const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
+            {/* 3rd Place */}
+            <Card className={`mc-panel leaderboard-card-hover rank-3`} padding="lg" style={{ order: 3 }}>
+              <Stack gap="md" align="center">
+                <Box style={{ animation: 'float 3s ease-in-out infinite', animationDelay: '1s' }}>{getMedalIcon(3)}</Box>
+                <Badge color={getRankBadgeColor(3)} size="lg" radius={0} className="mc-font" style={{ fontSize: '10px' }}>#3 PLATZ</Badge>
+                <Avatar src={`https://minotar.net/avatar/${rankedPlayers[2].username}/100`} size={100} radius={0} className="pixel-border" style={{ border: `4px solid ${getRankColor(3)}`, boxShadow: `0 0 15px ${getRankColor(3)}80` }} />
+                <Text className="mc-font" style={{ fontSize: '12px', color: getRankColor(3), textAlign: 'center', wordBreak: 'break-all' }}>{rankedPlayers[2].username}</Text>
+                <Divider style={{ width: '100%' }} />
+                <SimpleGrid cols={2} spacing="xs" style={{ width: '100%' }}>
+                  <Stack gap={2} align="center"><IconHeart size={16} color="#22c55e" fill="#22c55e" /><Text className="mc-font" size="xs" c="green">{rankedPlayers[2].lives}/3</Text></Stack>
+                  <Stack gap={2} align="center"><IconClock size={16} color="#3b82f6" /><Text className="mc-font" size="xs" c="blue">{rankedPlayers[2].playTime}</Text></Stack>
+                </SimpleGrid>
+              </Stack>
+            </Card>
+          </SimpleGrid>
+        </Box>
+      )}
 
-const CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
-
-
-
-const FILTERS_FILE_PATH = 'filters.json'; 
-
-const CHANNEL_LIST_PATH = 'channel_list.txt';
-
-const TARGET_GAME_NAME = 'Grand Theft Auto V';
-
-let gtaVGameId = null;
-
-
-
-if (!CLIENT_ID || !CLIENT_SECRET) {
-
-    console.error("FEHLER: TWITCH_CLIENT_ID oder TWITCH_CLIENT_SECRET fehlen.");
-
-    process.exit(1); 
-
+      {/* FULL LIST */}
+      <Stack gap="sm">
+        {rankedPlayers.map((player, index) => (
+          <Card key={player.id} className={`mc-panel leaderboard-card-hover ${index < 3 ? `rank-${index + 1}` : ''}`} padding="md" style={{ opacity: player.lives === 0 ? 0.5 : 1 }}>
+            <Group justify="space-between">
+              <Group gap="md">
+                <Text className="mc-font" style={{ width: 40 }}>#{index + 1}</Text>
+                <Avatar src={`https://minotar.net/avatar/${player.username}/60`} radius={0} className="pixel-border" />
+                <Text className="mc-font" style={{ fontSize: '10px' }}>{player.username}</Text>
+              </Group>
+              <Text className="mc-font" style={{ fontSize: '10px' }}>{player.playTime}</Text>
+            </Group>
+          </Card>
+        ))}
+      </Stack>
+    </Container>
+  );
 }
 
+// ============================================
+// PLAYERS PAGE COMPONENT
+// ============================================
+function PlayersPage() {
+  const [players, setPlayers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterLives, setFilterLives] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  useEffect(() => {
+    fetchPlayers();
+    const interval = setInterval(() => {
+      fetchPlayers();
+      setLastUpdate(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-let accessToken = null;
-
-
-
-app.use(cors());
-
-app.use(express.json());
-
-app.use(express.static(path.join(__dirname, 'dist')));
-
-
-
-app.get('/health', (req, res) => {
-
-    res.json({ 
-
-        status: 'ok', 
-
-        timestamp: new Date().toISOString(),
-
-        hasToken: !!accessToken
-
-    });
-
-});
-
-
-
-// ====================================================================
-
-// TWITCH API HELPER FUNCTIONS
-
-// ====================================================================
-
-
-
-async function getAccessToken() {
-
+  const fetchPlayers = async () => {
     try {
-
-        console.log("Rufe neues Twitch Access Token ab...");
-
-        const response = await fetch(
-
-            `https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`,
-
-            { method: 'POST' }
-
-        );
-
-
-
-        if (!response.ok) {
-
-            throw new Error(`Twitch Token API Fehler: ${response.statusText}`);
-
-        }
-
-
-
-        const data = await response.json();
-
-        accessToken = data.access_token;
-
-        console.log("✅ Access Token erfolgreich abgerufen.");
-
-        return accessToken;
-
+      setIsRefreshing(true);
+      const response = await axios.get(`${API_BASE}/api/minecraft/players`);
+      const apiData = response.data;
+      setPlayers(apiData.players || []);
+      setIsRefreshing(false);
     } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen des Access Tokens:", error.message);
-
-        accessToken = null;
-
-        return null;
-
+      setIsRefreshing(false);
+      notifications.show({ title: 'API Fehler', message: 'Konnte Daten nicht laden.', color: 'red' });
     }
+  };
 
+  const filteredPlayers = players
+    .filter(p => p.username.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  return (
+    <Container size="xl" py="xl">
+      <Title className="mc-font" order={3} mb="xl">SPIELER LEBEN</Title>
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
+        {filteredPlayers.map(player => (
+          <Card key={player.id} className="mc-panel" p="lg">
+            <Stack align="center">
+              <Avatar src={`https://minotar.net/avatar/${player.username}/80`} size={80} radius={0} className="pixel-border" />
+              <Text className="mc-font" style={{fontSize: '10px'}}>{player.username}</Text>
+              <Group gap={5}>
+                {[...Array(3)].map((_, i) => (
+                  <IconHeart key={i} size={20} fill={i < player.lives ? "red" : "none"} color={i < player.lives ? "red" : "#444"} />
+                ))}
+              </Group>
+            </Stack>
+          </Card>
+        ))}
+      </SimpleGrid>
+    </Container>
+  );
 }
 
+// ============================================
+// MAIN APP ENTRY
+// ============================================
+export default function App() {
+  const [activePage, setActivePage] = useState('leaderboard');
+  const [opened, { toggle }] = useDisclosure();
 
+  return (
+    <MantineProvider theme={theme} defaultColorScheme="dark">
+      <Notifications />
+      <AppShell
+        header={{ height: 60 }}
+        navbar={{ width: 200, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+        padding="md"
+      >
+        <AppShell.Header p="md" className="mc-panel">
+          <Group>
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <Text className="mc-font" style={{ fontSize: '12px' }}>SDRP</Text>
+          </Group>
+        </AppShell.Header>
 
-async function getGameId() {
+        <AppShell.Navbar p="md" className="mc-panel">
+          <Stack>
+            <Button variant="subtle" color="green" onClick={() => setActivePage('leaderboard')} className="mc-font" style={{fontSize: '8px'}}>LEADERBOARD</Button>
+            <Button variant="subtle" color="green" onClick={() => setActivePage('players')} className="mc-font" style={{fontSize: '8px'}}>SPIELER</Button>
+          </Stack>
+        </AppShell.Navbar>
 
-    if (gtaVGameId) return gtaVGameId;
-
-    if (!accessToken) {
-
-        await getAccessToken();
-
-        if (!accessToken) return null;
-
-    }
-
-
-
-    try {
-
-        const url = `https://api.twitch.tv/helix/games?name=${encodeURIComponent(TARGET_GAME_NAME)}`;
-
-        
-
-        const response = await fetch(url, {
-
-            method: 'GET',
-
-            headers: {
-
-                'Client-ID': CLIENT_ID,
-
-                'Authorization': `Bearer ${accessToken}`
-
-            }
-
-        });
-
-
-
-        if (!response.ok) {
-
-            throw new Error(`Twitch Game API Fehler: ${response.statusText}`);
-
-        }
-
-
-
-        const data = await response.json();
-
-        if (data.data && data.data.length > 0) {
-
-            gtaVGameId = data.data[0].id;
-
-            console.log(`✅ Game ID für ${TARGET_GAME_NAME}: ${gtaVGameId}`);
-
-            return gtaVGameId;
-
-        }
-
-        return null;
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Game ID:", error.message);
-
-        return null;
-
-    }
-
+        <AppShell.Main style={{ background: '#1a1a1a', minHeight: '100vh' }}>
+          {activePage === 'leaderboard' ? <LeaderboardPage /> : <PlayersPage />}
+        </AppShell.Main>
+      </AppShell>
+    </MantineProvider>
+  );
 }
-
-
-
-async function getChannelsFromFile() {
-
-    try {
-
-        const data = await fs.promises.readFile(CHANNEL_LIST_PATH, 'utf8');
-
-        const channels = data
-
-            .split('\n')
-
-            .map(line => line.trim().toLowerCase())
-
-            .filter(line => line.length > 0);
-
-        
-
-        return channels;
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Lesen der Kanalliste:", error);
-
-        return [];
-
-    }
-
-}
-
-
-
-async function getKeywordsFromFilters() {
-
-    try {
-
-        const data = await fs.promises.readFile(FILTERS_FILE_PATH, 'utf8');
-
-        const filters = JSON.parse(data);
-
-
-
-        if (filters && Array.isArray(filters.keywords)) {
-
-            const keywords = filters.keywords
-
-                .map(keyword => String(keyword).trim().toLowerCase())
-
-                .filter(keyword => keyword.length > 0);
-
-            
-
-            return keywords;
-
-        }
-
-        return [];
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Lesen der Filter:", error);
-
-        return [];
-
-    }
-
-}
-
-
-
-// ====================================================================
-
-// STREAM API
-
-// ====================================================================
-
-
-
-async function getStreamsByChannels(channels) {
-
-    if (!accessToken) await getAccessToken();
-
-    if (!accessToken) return [];
-
-    if (channels.length === 0) return [];
-
-
-
-    try {
-
-        const channelBatches = [];
-
-        for (let i = 0; i < channels.length; i += 100) {
-
-            channelBatches.push(channels.slice(i, i + 100));
-
-        }
-
-
-
-        let allStreams = [];
-
-
-
-        for (const batch of channelBatches) {
-
-            const params = batch.map(ch => `user_login=${encodeURIComponent(ch)}`).join('&');
-
-            const url = `https://api.twitch.tv/helix/streams?${params}`;
-
-
-
-            const response = await fetch(url, {
-
-                method: 'GET',
-
-                headers: {
-
-                    'Client-ID': CLIENT_ID,
-
-                    'Authorization': `Bearer ${accessToken}`
-
-                }
-
-            });
-
-
-
-            if (response.status === 401) {
-
-                accessToken = null;
-
-                return [];
-
-            }
-
-            
-
-            if (!response.ok) {
-
-                throw new Error(`Twitch API Fehler: ${response.statusText}`);
-
-            }
-
-
-
-            const data = await response.json();
-
-            allStreams = allStreams.concat(data.data || []);
-
-        }
-
-
-
-        return allStreams;
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Streams:", error.message);
-
-        return [];
-
-    }
-
-}
-
-
-
-async function getTwitchStreams() {
-
-    if (!accessToken) await getAccessToken();
-
-    if (!accessToken) return { streams: [], error: "NO_ACCESS_TOKEN" };
-
-    
-
-    const keywords = await getKeywordsFromFilters();
-
-    const channels = await getChannelsFromFile();
-
-    
-
-    let filteredStreams = [];
-
-
-
-    if (channels.length > 0) {
-
-        const channelStreams = await getStreamsByChannels(channels);
-
-        filteredStreams = filteredStreams.concat(channelStreams);
-
-    }
-
-
-
-    if (keywords.length > 0) {
-
-        if (!gtaVGameId) await getGameId();
-
-        if (gtaVGameId) {
-
-            const MAX_STREAMS = 100;
-
-            const url = `https://api.twitch.tv/helix/streams?game_id=${gtaVGameId}&first=${MAX_STREAMS}`;
-
-
-
-            try {
-
-                const response = await fetch(url, {
-
-                    method: 'GET',
-
-                    headers: {
-
-                        'Client-ID': CLIENT_ID,
-
-                        'Authorization': `Bearer ${accessToken}`
-
-                    }
-
-                });
-
-
-
-                if (response.ok) {
-
-                    const data = await response.json();
-
-                    let allStreams = data.data || [];
-
-                    
-
-                    const keywordStreams = allStreams.filter(stream => {
-
-                        const streamTitle = stream.title.toLowerCase();
-
-                        const streamerName = stream.user_name.toLowerCase();
-
-                        
-
-                        return keywords.some(keyword => 
-
-                            streamTitle.includes(keyword) || streamerName.includes(keyword)
-
-                        );
-
-                    });
-
-                    
-
-                    filteredStreams = filteredStreams.concat(keywordStreams);
-
-                }
-
-            } catch (error) {
-
-                console.error("❌ Keyword-Search Fehler:", error);
-
-            }
-
-        }
-
-    }
-
-
-
-    const uniqueStreams = Array.from(
-
-        new Map(filteredStreams.map(stream => [stream.id, stream])).values()
-
-    );
-
-
-
-    uniqueStreams.sort((a, b) => b.viewer_count - a.viewer_count);
-
-
-
-    return { streams: uniqueStreams };
-
-}
-
-
-
-async function getStreamerData() {
-
-    if (!accessToken) await getAccessToken();
-
-    if (!accessToken) return { streamers: [] };
-
-    
-
-    const channels = await getChannelsFromFile();
-
-    if (channels.length === 0) return { streamers: [] };
-
-    
-
-    try {
-
-        const userLogins = channels.map(ch => `login=${encodeURIComponent(ch)}`).join('&');
-
-        const userUrl = `https://api.twitch.tv/helix/users?${userLogins}`;
-
-        
-
-        const userResponse = await fetch(userUrl, {
-
-            headers: {
-
-                'Client-ID': CLIENT_ID,
-
-                'Authorization': `Bearer ${accessToken}`
-
-            }
-
-        });
-
-        
-
-        if (!userResponse.ok) return { streamers: [] };
-
-        
-
-        const userData = await userResponse.json();
-
-        const users = userData.data || [];
-
-        
-
-        const streamersWithData = await Promise.all(users.map(async (user) => {
-
-            try {
-
-                const followerUrl = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${user.id}`;
-
-                const followerResponse = await fetch(followerUrl, {
-
-                    headers: {
-
-                        'Client-ID': CLIENT_ID,
-
-                        'Authorization': `Bearer ${accessToken}`
-
-                    }
-
-                });
-
-                
-
-                let followerCount = 0;
-
-                if (followerResponse.ok) {
-
-                    const followerData = await followerResponse.json();
-
-                    followerCount = followerData.total || 0;
-
-                }
-
-                
-
-                const clipsUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user.id}&first=1`;
-
-                const clipsResponse = await fetch(clipsUrl, {
-
-                    headers: {
-
-                        'Client-ID': CLIENT_ID,
-
-                        'Authorization': `Bearer ${accessToken}`
-
-                    }
-
-                });
-
-                
-
-                let topClip = null;
-
-                if (clipsResponse.ok) {
-
-                    const clipsData = await clipsResponse.json();
-
-                    if (clipsData.data && clipsData.data.length > 0) {
-
-                        topClip = clipsData.data[0];
-
-                    }
-
-                }
-
-                
-
-                const streamUrl = `https://api.twitch.tv/helix/streams?user_id=${user.id}`;
-
-                const streamResponse = await fetch(streamUrl, {
-
-                    headers: {
-
-                        'Client-ID': CLIENT_ID,
-
-                        'Authorization': `Bearer ${accessToken}`
-
-                    }
-
-                });
-
-                
-
-                let isLive = false;
-
-                let lastStream = null;
-
-                if (streamResponse.ok) {
-
-                    const streamData = await streamResponse.json();
-
-                    isLive = streamData.data && streamData.data.length > 0;
-
-                    if (isLive) {
-
-                        lastStream = streamData.data[0];
-
-                    }
-
-                }
-
-                
-
-                return {
-
-                    id: user.id,
-
-                    login: user.login,
-
-                    display_name: user.display_name,
-
-                    description: user.description,
-
-                    profile_image_url: user.profile_image_url,
-
-                    view_count: user.view_count,
-
-                    follower_count: followerCount,
-
-                    top_clip: topClip,
-
-                    is_live: isLive,
-
-                    last_stream: lastStream
-
-                };
-
-            } catch (error) {
-
-                console.error(`❌ Fehler beim Laden der Daten für ${user.login}:`, error);
-
-                return {
-
-                    id: user.id,
-
-                    login: user.login,
-
-                    display_name: user.display_name,
-
-                    description: user.description,
-
-                    profile_image_url: user.profile_image_url,
-
-                    view_count: user.view_count,
-
-                    follower_count: 0,
-
-                    is_live: false
-
-                };
-
-            }
-
-        }));
-
-        
-
-        return { streamers: streamersWithData };
-
-        
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Streamer-Daten:", error);
-
-        return { streamers: [] };
-
-    }
-
-}
-
-
-
-async function getClipsForChannel(channelLogin) {
-
-    if (!accessToken) await getAccessToken();
-
-    if (!accessToken) return { clips: [] };
-
-    
-
-    try {
-
-        const userUrl = `https://api.twitch.tv/helix/users?login=${channelLogin}`;
-
-        const userResponse = await fetch(userUrl, {
-
-            headers: {
-
-                'Client-ID': CLIENT_ID,
-
-                'Authorization': `Bearer ${accessToken}`
-
-            }
-
-        });
-
-        
-
-        if (!userResponse.ok) return { clips: [] };
-
-        
-
-        const userData = await userResponse.json();
-
-        if (!userData.data || userData.data.length === 0) return { clips: [] };
-
-        
-
-        const userId = userData.data[0].id;
-
-        
-
-        const clipsUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${userId}&first=10`;
-
-        const clipsResponse = await fetch(clipsUrl, {
-
-            headers: {
-
-                'Client-ID': CLIENT_ID,
-
-                'Authorization': `Bearer ${accessToken}`
-
-            }
-
-        });
-
-        
-
-        if (!clipsResponse.ok) return { clips: [] };
-
-        
-
-        const clipsData = await clipsResponse.json();
-
-        return { clips: clipsData.data || [] };
-
-        
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Clips:", error);
-
-        return { clips: [] };
-
-    }
-
-}
-
-
-
-// ====================================================================
-
-// API ENDPOINTS
-
-// ====================================================================
-
-
-
-app.get('/api/twitch/streams', async (req, res) => {
-
-    try {
-
-        const data = await getTwitchStreams();
-
-        
-
-        if (data.error) {
-
-            return res.status(503).json({ 
-
-                error: "Fehler beim Abrufen der Streams", 
-
-                details: data.error 
-
-            });
-
-        }
-
-        
-
-        res.json(data);
-
-    } catch (error) {
-
-        console.error("❌ Unerwarteter Fehler:", error);
-
-        res.status(500).json({ 
-
-            error: "Interner Server-Fehler",
-
-            message: error.message 
-
-        });
-
-    }
-
-});
-
-
-
-app.get('/api/twitch/streamer-data', async (req, res) => {
-
-    try {
-
-        const data = await getStreamerData();
-
-        res.json(data);
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Streamer-Daten:", error);
-
-        res.status(500).json({ 
-
-            error: "Fehler beim Abrufen der Streamer-Daten",
-
-            message: error.message 
-
-        });
-
-    }
-
-});
-
-
-
-app.get('/api/twitch/clips', async (req, res) => {
-
-    try {
-
-        const channel = req.query.channel;
-
-        if (!channel) {
-
-            return res.status(400).json({ error: 'Channel parameter required' });
-
-        }
-
-        
-
-        const data = await getClipsForChannel(channel);
-
-        res.json(data);
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Clips:", error);
-
-        res.status(500).json({ 
-
-            error: "Fehler beim Abrufen der Clips",
-
-            message: error.message 
-
-        });
-
-    }
-
-});
-
-
-
-// ====================================================================
-
-// DEATH BROADCAST API
-
-// ====================================================================
-
-
-
-// In-Memory Death Messages Storage
-
-let deathMessages = [];
-
-const MAX_DEATH_MESSAGES = 100;
-
-
-
-// POST: Neue Todesnachricht empfangen
-
-app.post('/api/deathbroadcast', (req, res) => {
-
-    const { message, player, killer, weapon, location, timestamp } = req.body;
-
-    
-
-    if (!message) {
-
-        return res.status(400).json({ 
-
-            success: false, 
-
-            error: 'Nachricht fehlt' 
-
-        });
-
-    }
-
-
-
-    const deathEvent = {
-
-        id: Date.now(),
-
-        message,
-
-        player: player || 'Unbekannt',
-
-        killer: killer || 'Unbekannt',
-
-        weapon: weapon || 'Unbekannt',
-
-        location: location || null,
-
-        timestamp: timestamp || new Date().toISOString(),
-
-        receivedAt: new Date().toISOString()
-
-    };
-
-
-
-    deathMessages.unshift(deathEvent);
-
-    
-
-    if (deathMessages.length > MAX_DEATH_MESSAGES) {
-
-        deathMessages = deathMessages.slice(0, MAX_DEATH_MESSAGES);
-
-    }
-
-
-
-    console.log(`💀 Death: ${deathEvent.player} von ${deathEvent.killer} mit ${deathEvent.weapon}`);
-
-
-
-    res.status(200).json({ 
-
-        success: true,
-
-        id: deathEvent.id,
-
-        message: 'Todesnachricht erfolgreich empfangen'
-
-    });
-
-});
-
-
-
-// GET: Alle Todesnachrichten abrufen
-
-app.get('/api/deathbroadcast', (req, res) => {
-
-    const { limit = 20, offset = 0 } = req.query;
-
-    
-
-    const paginatedMessages = deathMessages.slice(
-
-        parseInt(offset), 
-
-        parseInt(offset) + parseInt(limit)
-
-    );
-
-
-
-    res.json({
-
-        total: deathMessages.length,
-
-        limit: parseInt(limit),
-
-        offset: parseInt(offset),
-
-        messages: paginatedMessages
-
-    });
-
-});
-
-
-
-// GET: Einzelne Todesnachricht abrufen
-
-app.get('/api/deathbroadcast/:id', (req, res) => {
-
-    const { id } = req.params;
-
-    const message = deathMessages.find(m => m.id === parseInt(id));
-
-    
-
-    if (!message) {
-
-        return res.status(404).json({ 
-
-            success: false, 
-
-            error: 'Nachricht nicht gefunden' 
-
-        });
-
-    }
-
-
-
-    res.json(message);
-
-});
-
-
-
-// DELETE: Alle Todesnachrichten löschen
-
-app.delete('/api/deathbroadcast', (req, res) => {
-
-    const count = deathMessages.length;
-
-    deathMessages = [];
-
-    
-
-    console.log(`🗑️  ${count} Todesnachrichten gelöscht`);
-
-    
-
-    res.json({ 
-
-        success: true, 
-
-        deletedCount: count,
-
-        message: 'Alle Todesnachrichten gelöscht'
-
-    });
-
-});
-
-
-
-// GET: Death Broadcast Statistiken
-
-app.get('/api/deathbroadcast/stats', (req, res) => {
-
-    const killers = {};
-
-    const weapons = {};
-
-    
-
-    deathMessages.forEach(msg => {
-
-        if (msg.killer && msg.killer !== 'Unbekannt') {
-
-            killers[msg.killer] = (killers[msg.killer] || 0) + 1;
-
-        }
-
-        if (msg.weapon && msg.weapon !== 'Unbekannt') {
-
-            weapons[msg.weapon] = (weapons[msg.weapon] || 0) + 1;
-
-        }
-
-    });
-
-    
-
-    const topKillers = Object.entries(killers)
-
-        .sort(([, a], [, b]) => b - a)
-
-        .slice(0, 10)
-
-        .map(([name, kills]) => ({ name, kills }));
-
-        
-
-    const topWeapons = Object.entries(weapons)
-
-        .sort(([, a], [, b]) => b - a)
-
-        .slice(0, 10)
-
-        .map(([name, uses]) => ({ name, uses }));
-
-
-
-    res.json({
-
-        totalMessages: deathMessages.length,
-
-        lastMessage: deathMessages[0] || null,
-
-        oldestMessage: deathMessages[deathMessages.length - 1] || null,
-
-        topKillers,
-
-        topWeapons
-
-    });
-
-});
-
-
-
-// ====================================================================
-
-// MINECRAFT PLAYERS API
-
-// ====================================================================
-
-
-
-// In-Memory Player Storage - LEER! Wird nur durch POST /update gefüllt
-
-let minecraftPlayers = [];
-
-
-
-// GET: Alle Minecraft Spieler abrufen
-
-app.get('/api/minecraft/players', async (req, res) => {
-
-    try {
-
-        console.log('🎮 Fetching Minecraft players...');
-
-        const players = minecraftPlayers;
-
-        console.log(`✅ Loaded ${players.length} Minecraft players`);
-
-        
-
-        res.setHeader('Cache-Control', 'public, max-age=5');
-
-        res.json({ 
-
-            players: players,
-
-            timestamp: new Date().toISOString(),
-
-            count: players.length
-
-        });
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen der Minecraft Players:", error.message);
-
-        res.status(500).json({
-
-            error: "Fehler beim Abrufen der Spieler-Daten",
-
-            message: error.message,
-
-            players: []
-
-        });
-
-    }
-
-});
-
-
-
-// POST: Minecraft Spieler updaten
-
-app.post('/api/minecraft/players/update', (req, res) => {
-
-    try {
-
-        const { username, lives, kills, deaths, playTime, status, lastDeath } = req.body;
-
-        
-
-        if (!username) {
-
-            return res.status(400).json({ error: 'Username required' });
-
-        }
-
-        
-
-        let playerIndex = minecraftPlayers.findIndex(p => p.username === username);
-
-        
-
-        if (playerIndex >= 0) {
-
-            minecraftPlayers[playerIndex] = {
-
-                ...minecraftPlayers[playerIndex],
-
-                lives: lives !== undefined ? lives : minecraftPlayers[playerIndex].lives,
-
-                kills: kills !== undefined ? kills : minecraftPlayers[playerIndex].kills,
-
-                deaths: deaths !== undefined ? deaths : minecraftPlayers[playerIndex].deaths,
-
-                playTime: playTime || minecraftPlayers[playerIndex].playTime,
-
-                status: status || minecraftPlayers[playerIndex].status,
-
-                lastDeath: lastDeath !== undefined ? lastDeath : minecraftPlayers[playerIndex].lastDeath
-
-            };
-
-            console.log(`✅ Updated player: ${username}`);
-
-            res.json({ success: true, player: minecraftPlayers[playerIndex] });
-
-        } else {
-
-            const newPlayer = {
-
-                id: minecraftPlayers.length + 1,
-
-                username,
-
-                lives: lives || 3,
-
-                kills: kills || 0,
-
-                deaths: deaths || 0,
-
-                playTime: playTime || '0h',
-
-                status: status || 'offline',
-
-                lastDeath: lastDeath || null
-
-            };
-
-            minecraftPlayers.push(newPlayer);
-
-            console.log(`✅ Created new player: ${username}`);
-
-            res.json({ success: true, player: newPlayer });
-
-        }
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Update:", error);
-
-        res.status(500).json({ error: error.message });
-
-    }
-
-});
-
-
-
-// GET: Statistiken
-
-app.get('/api/minecraft/stats', (req, res) => {
-
-    try {
-
-        const stats = {
-
-            total: minecraftPlayers.length,
-
-            alive: minecraftPlayers.filter(p => p.lives > 0).length,
-
-            eliminated: minecraftPlayers.filter(p => p.lives === 0).length,
-
-            threeHearts: minecraftPlayers.filter(p => p.lives === 3).length,
-
-            twoHearts: minecraftPlayers.filter(p => p.lives === 2).length,
-
-            oneHeart: minecraftPlayers.filter(p => p.lives === 1).length,
-
-        };
-
-        res.json(stats);
-
-    } catch (error) {
-
-        res.status(500).json({ error: error.message });
-
-    }
-
-});
-
-
-
-app.get('/api/fivem/status', async (req, res) => {
-
-    try {
-
-        const serverCode = 'g984bz';
-
-        const apiUrl = `https://servers-frontend.fivem.net/api/servers/single/${serverCode}`;
-
-        
-
-        console.log('🎮 Fetching FiveM server status...');
-
-        
-
-        const response = await fetch(apiUrl, {
-
-            headers: {
-
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-
-            }
-
-        });
-
-        
-
-        if (!response.ok) {
-
-            throw new Error(`FiveM API error: ${response.status}`);
-
-        }
-
-        
-
-        const data = await response.json();
-
-        let serverData = data.Data || data.data || data;
-
-        
-
-        let playerCount = serverData.clients || serverData.players || serverData.playersCount || 0;
-
-        let maxPlayers = serverData.sv_maxclients || serverData.maxPlayers || serverData.svMaxclients || 128;
-
-        const serverName = serverData.hostname || serverData.name || 'SD-RP Server';
-
-        const online = playerCount !== undefined && maxPlayers !== undefined;
-
-        
-
-        const result = {
-
-            online: online,
-
-            players: parseInt(playerCount) || 0,
-
-            maxPlayers: parseInt(maxPlayers) || 128,
-
-            serverName: serverName,
-
-            uptime: serverData.uptime || null,
-
-            connectEndpoint: serverData.connectEndPoint || serverData.connectEndpoint || null
-
-        };
-
-        
-
-        console.log(`✅ FiveM Status: ${result.players}/${result.maxPlayers} Spieler`);
-
-        
-
-        res.setHeader('Cache-Control', 'public, max-age=10');
-
-        res.json(result);
-
-        
-
-    } catch (error) {
-
-        console.error("❌ Fehler beim Abrufen des FiveM Status:", error.message);
-
-        
-
-        res.status(200).json({
-
-            online: false,
-
-            players: 0,
-
-            maxPlayers: 128,
-
-            serverName: 'SD-RP Server',
-
-            error: error.message
-
-        });
-
-    }
-
-});
-
-
-
-// ====================================================================
-
-// SERVE FRONTEND (React App) - SPA Fallback
-
-// ====================================================================
-
-
-
-// Serve React app for all non-API routes (SPA fallback)
-
-app.use((req, res, next) => {
-
-    // Skip API routes - let them pass through to 404 handler
-
-    if (req.path.startsWith('/api/') || req.path === '/health') {
-
-        return next();
-
-    }
-
-    
-
-    // Check if dist/index.html exists
-
-    const indexPath = path.join(__dirname, 'dist', 'index.html');
-
-    
-
-    // Try to serve index.html
-
-    res.sendFile(indexPath, (err) => {
-
-        if (err) {
-
-            console.error('❌ Error serving index.html:', err.message);
-
-            console.error('   Path:', indexPath);
-
-            console.error('   __dirname:', __dirname);
-
-            
-
-            // Fallback: Send simple HTML page
-
-            res.status(200).send(`
-
-                <!DOCTYPE html>
-
-                <html>
-
-                <head>
-
-                    <title>SD-RP Broadcast</title>
-
-                    <style>
-
-                        body { 
-
-                            font-family: Arial, sans-serif; 
-
-                            display: flex; 
-
-                            justify-content: center; 
-
-                            align-items: center; 
-
-                            height: 100vh; 
-
-                            margin: 0;
-
-                            background: #1a1a1a;
-
-                            color: white;
-
-                        }
-
-                        .container {
-
-                            text-align: center;
-
-                            padding: 40px;
-
-                        }
-
-                        h1 { color: #48bb78; }
-
-                        .status { 
-
-                            background: #2d2d2d; 
-
-                            padding: 20px; 
-
-                            border-radius: 8px; 
-
-                            margin-top: 20px;
-
-                        }
-
-                        a { color: #48bb78; text-decoration: none; }
-
-                        a:hover { text-decoration: underline; }
-
-                    </style>
-
-                </head>
-
-                <body>
-
-                    <div class="container">
-
-                        <h1>🎮 SD-RP Broadcast API</h1>
-
-                        <p>Frontend build not available yet.</p>
-
-                        <div class="status">
-
-                            <h3>✅ API Endpoints Available:</h3>
-
-                            <p><a href="/api/minecraft/players">📊 Minecraft Players</a></p>
-
-                            <p><a href="/api/twitch/streams">🎥 Twitch Streams</a></p>
-
-                            <p><a href="/api/deathbroadcast">💀 Death Broadcast</a></p>
-
-                            <p><a href="/api/fivem/status">🎮 FiveM Status</a></p>
-
-                            <p><a href="/health">❤️ Health Check</a></p>
-
-                        </div>
-
-                        <p style="margin-top: 20px; color: #888;">
-
-                            Run <code>npm run build</code> to generate frontend.
-
-                        </p>
-
-                    </div>
-
-                </body>
-
-                </html>
-
-            `);
-
-        }
-
-    });
-
-});
-
-
-
-// ====================================================================
-
-// ERROR HANDLERS
-
-// ====================================================================
-
-
-
-app.use((req, res) => {
-
-    res.status(404).json({ error: 'Endpoint nicht gefunden' });
-
-});
-
-
-
-app.use((err, req, res, next) => {
-
-    console.error('❌ Error:', err.stack);
-
-    res.status(500).json({ 
-
-        error: 'Interner Server-Fehler',
-
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Ein Fehler ist aufgetreten'
-
-    });
-
-});
-
-
-
-app.listen(PORT, async () => {
-
-    console.log(`🚀 Server läuft auf Port ${PORT}`);
-
-    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-
-    await getAccessToken();
-
-    await getGameId();
-
-    console.log('✅ Server bereit mit ALLEN Features!');
-
-    console.log('📡 Endpoints:');
-
-    console.log('   - /api/twitch/streams');
-
-    console.log('   - /api/twitch/streamer-data');
-
-    console.log('   - /api/twitch/clips?channel=USERNAME');
-
-    console.log('   - /api/fivem/status');
-
-    console.log('💀 Death Broadcast:');
-
-    console.log('   - POST /api/deathbroadcast');
-
-    console.log('   - GET  /api/deathbroadcast');
-
-    console.log('   - GET  /api/deathbroadcast/stats');
-
-    console.log('🎮 Minecraft Players:');
-
-    console.log('   - GET  /api/minecraft/players');
-
-    console.log('   - POST /api/minecraft/players/update');
-
-    console.log('   - GET  /api/minecraft/stats');
-
-});
