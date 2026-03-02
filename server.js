@@ -532,27 +532,3 @@ router.post("/players", (req, res) => {
 
     res.json({ success: true });
 });
-app.post('/api/minecraft/stats', async (req, res) => {
-    try {
-        const { server, ts, players } = req.body;
-
-        if (!players || !Array.isArray(players)) {
-            return res.status(400).json({ error: "Invalid stats payload" });
-        }
-
-        const data = {
-            server: server || "unknown",
-            ts: ts || new Date().toISOString(),
-            players
-        };
-
-        await saveMinecraftData(data);
-
-        console.log(`📊 Stats update: ${players.length} players`);
-
-        res.json({ success: true, count: players.length });
-    } catch (err) {
-        console.error("Stats save error:", err);
-        res.status(500).json({ error: err.message });
-    }
-});
