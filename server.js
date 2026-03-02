@@ -63,7 +63,7 @@ let accessToken = null;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist')));
+
 
 app.get('/health', (req, res) => {
     res.json({ 
@@ -462,59 +462,4 @@ app.delete('/api/minecraft/players', async (req, res) => {
     res.json({ success: true, deletedCount: count });
 });
 
-// ====================================================================
-// SERVE FRONTEND (React App) - SPA Fallback
-// ====================================================================
-
-app.use((req, res, next) => {
-    if (req.path.startsWith('/api/') || req.path === '/health') return next();
-    const indexPath = path.join(__dirname, 'dist', 'index.html');
-    res.sendFile(indexPath, (err) => {
-        if (err) {
-            res.status(200).send(`
-                <!DOCTYPE html><html><head><title>SD-RP Broadcast</title>
-                <style>body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#1a1a1a;color:white;}
-                .container{text-align:center;padding:40px;}h1{color:#48bb78;}.status{background:#2d2d2d;padding:20px;border-radius:8px;margin-top:20px;}
-                a{color:#48bb78;text-decoration:none;}a:hover{text-decoration:underline;}</style></head>
-                <body><div class="container"><h1>🎮 SD-RP Broadcast API</h1><p>Frontend build not available yet.</p>
-                <div class="status"><h3>✅ API Endpoints Available:</h3>
-                <p><a href="/api/minecraft/players">📊 Minecraft Players</a></p>
-                <p><a href="/api/twitch/streams">🎥 Twitch Streams</a></p>
-                <p><a href="/api/deathbroadcast">💀 Death Broadcast</a></p>
-                <p><a href="/api/fivem/status">🎮 FiveM Status</a></p>
-                <p><a href="/health">❤️ Health Check</a></p></div>
-                <p style="margin-top:20px;color:#888;">Run <code>npm run build</code> to generate frontend.</p>
-                </div></body></html>
-            `);
-        }
-    });
-});
-
-// ====================================================================
-// ERROR HANDLERS
-// ====================================================================
-
-app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint nicht gefunden' });
-});
-
-app.use((err, req, res, next) => {
-    console.error('❌ Error:', err.stack);
-    res.status(500).json({ error: 'Interner Server-Fehler', message: process.env.NODE_ENV === 'development' ? err.message : 'Ein Fehler ist aufgetreten' });
-});
-
-app.listen(PORT, async () => {
-    console.log(`🚀 Server läuft auf Port ${PORT}`);
-    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    await loadMinecraftData();
-    await getAccessToken();
-    await getGameId();
-    console.log('✅ Server bereit!');
-    console.log('📡 Endpoints:');
-    console.log('   GET  /api/minecraft/players');
-    console.log('   POST /api/minecraft/players/update');
-    console.log('   GET  /api/twitch/streams');
-    console.log('   GET  /api/twitch/streamer-data');
-    console.log('   POST /api/deathbroadcast');
-    console.log('   GET  /api/deathbroadcast');
 
