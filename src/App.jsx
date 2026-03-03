@@ -17,7 +17,7 @@ import { notifications, Notifications } from '@mantine/notifications';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
-const API_BASE = 'https://sdrp-broadcast.onrender.com';
+const API_BASE = 'http://api.hallodasevent.de';
 const PROJECT_START = new Date('2026-02-07T18:00:00');
 
 const theme = createTheme({
