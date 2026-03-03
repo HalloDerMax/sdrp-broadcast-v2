@@ -514,23 +514,49 @@ function PlayersPage() {
   }, []);
 
   const fetchPlayers = async () => {
-    try {
-      setIsRefreshing(true);
-      const response = await axios.get(STATS_ENDPOINT);
-      const data = response.data;
-      setPlayers(data.players || []);
-      setIsRefreshing(false);
-    } catch (error) {
-      setIsRefreshing(false);
-      console.error('❌ Error fetching stats:', error);
-      notifications.show({
-        title: 'API Fehler',
-        message: 'Konnte Stats-Daten nicht laden.',
-        color: 'red',
-        autoClose: 5000,
-      });
-    }
-  };
+  try {
+    setIsRefreshing(true);
+
+    const response = await axios.get(STATS_ENDPOINT);
+    const data = response.data;
+
+    const normalized = (data.players || []).map((p) => ({
+      ...p,
+
+      // Name absichern
+      username: p.username || p.name || "Unbekannt",
+
+      // UUID absichern
+      uuid: p.uuid || p.id || null,
+
+      // Zahlen absichern
+      playerKills: p.playerKills || 0,
+      deaths: p.deaths || 0,
+
+      // Objekte absichern
+      mined: p.mined || {},
+      killed: p.killed || {},
+
+      // Zeit absichern
+      aliveSince: p.aliveSince || "0h",
+      awakeSince: p.awakeSince || "-"
+    }));
+
+    setPlayers(normalized);
+    setIsRefreshing(false);
+
+  } catch (error) {
+    setIsRefreshing(false);
+    console.error('❌ Error fetching stats:', error);
+
+    notifications.show({
+      title: 'API Fehler',
+      message: 'Konnte Stats-Daten nicht laden.',
+      color: 'red',
+      autoClose: 5000,
+    });
+  }
+};
 
   const sumObj = (obj) => obj ? Object.values(obj).reduce((a, b) => a + b, 0) : 0;
 
