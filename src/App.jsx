@@ -535,7 +535,7 @@ function PlayersPage() {
   const sumObj = (obj) => obj ? Object.values(obj).reduce((a, b) => a + b, 0) : 0;
 
   const filteredPlayers = players
-    .filter(p => p.username.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(p => (p.username || p.name || "").toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'kills')    return b.playerKills - a.playerKills;
       if (sortBy === 'deaths')   return b.deaths - a.deaths;
