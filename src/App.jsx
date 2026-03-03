@@ -95,19 +95,18 @@ function LeaderboardPage() {
         return;
       }
       const processedPlayers = playersData.map((player) => {
-      const deaths = player.deaths || 0;
-      const lives = Math.max(3 - deaths, 0); // Hardcore 3 Leben Logik
+  const deaths = player.deaths || 0;
+  const lives = Math.max(3 - deaths, 0);
+  const playTime = player.aliveSince || "0h";
 
-      return {
+  return {
     id: player.uuid || player.username,
-    username: player.username,
+    username: player.username || player.name || "Unbekannt",
     lives: lives,
     kills: player.playerKills || 0,
     deaths: deaths,
-    playTime: player.aliveSince || '0h',
-    playTimeMinutes: parsePlaytimeToMinutes(player.aliveSince || '0h'),
-    status: 'online',
-    lastDeath: null
+    playTime: playTime,
+    playTimeMinutes: parsePlaytimeToMinutes(playTime)
   };
 });
       
